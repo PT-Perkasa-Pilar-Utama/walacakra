@@ -1,20 +1,12 @@
 {
   "name": "walacakra",
-  "type": "module",
-  "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
-    "@astrojs/node": "^9.4.6",
-    "@astrojs/vue": "^5.1.1",
-    "astro": "^5.14.4",
-    "vue": "^3.5.22"
+    "hono": "^4.9.12"
   },
   "devDependencies": {
-    "retext-latin": "^4.0.0"
+    "@types/bun": "latest"
   }
 }

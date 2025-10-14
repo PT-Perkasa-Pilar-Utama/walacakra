@@ -1,0 +1,4 @@
+- Sacrifice grammar for the sake of concision
+- Always run "npx tsc --noEmit" and fix the type error
+- Follows the principle: "Tell a story with your code" - each function/components is a chapter, and the main function/component tells the complete story in just a few lines
+- Minimize the comment unless it is necessary

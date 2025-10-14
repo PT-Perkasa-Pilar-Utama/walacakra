@@ -1,0 +1,19 @@
+{
+  "name": "walacakra",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/vue": "^5.1.1",
+    "astro": "^5.14.4",
+    "vue": "^3.5.22"
+  },
+  "devDependencies": {
+    "retext-latin": "^4.0.0"
+  }
+}

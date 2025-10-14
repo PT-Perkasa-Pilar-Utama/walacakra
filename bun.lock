@@ -10,6 +10,7 @@
         "ollama": "^0.6.0",
         "ppu-paddle-ocr": "^3.1.1",
         "ppu-pdf": "^5.4.3",
+        "zod": "^4.1.12",
       },
       "devDependencies": {
         "@types/bun": "latest",

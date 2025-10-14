@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Analysis - Bank Jakarta</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span>Bank Jakarta</span>
+            </div>
+            <h1 class="header-title">Intelligent Document Processor</h1>
+            <div class="status-badge">
+                <div class="checkmark"></div>
+                <span>Processed 1 file Completed in 123s</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="file-selector">
+                <div class="file-dropdown">
+                    <span>File1.pdf</span>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active">Analysis</button>
+                <button class="tab">History</button>
+            </div>
+
+            <div class="main-content">
+                <div class="left-panel">
+                    <div class="profile-card">
+                        <div class="profile-image">👤</div>
+                        <div class="field-group">
+                            <div class="field-label">Name:</div>
+                            <div class="field-value">Fiqri</div>
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">NIK:</div>
+                            <div class="field-value">1234567890</div>
+                        </div>
+                    </div>
+
+                    <div class="document-preview">
+                        <div class="preview-header">Page Preview</div>
+                        <div class="preview-container" id="previewContainer">
+                            <div class="preview-image" id="previewImage">Document Preview</div>
+                            <div class="magnifier" id="magnifier">
+                                <div class="magnifier-content">Document Preview</div>
+                            </div>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" id="zoomIn">+</button>
+                                <button class="zoom-btn" id="zoomOut">−</button>
+                                <button class="zoom-btn" id="zoomReset">⟲</button>
+                            </div>
+                        </div>
+                        
+                        <div class="page-navigation">
+                            <button class="page-btn">◀</button>
+                            <span class="page-info">1 / 10</span>
+                            <button class="page-btn">▶</button>
+                        </div>
+
+                        <div class="nik-reading">
+                            <div class="nik-label">NIK Reading:</div>
+                            <div class="nik-value">1234567890</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <h2 class="summary-title">Summary:</h2>
+                    
+                    <div class="page-item">
+                        <div class="page-header">• Page1</div>
+                        <div class="data-row">
+                            <span class="data-label">○ Type:</span>
+                            <span class="data-value">KTP</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">○ NIK:</span>
+                            <span class="data-value">1234567890</span>
+                            <div class="status-indicator">
+                                <span class="status-icon match"></span>
+                                <span class="status-text">match</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <div class="page-header">• Page2</div>
+                        <div class="data-row">
+                            <span class="data-label">○ Type:</span>
+                            <span class="data-value">KK</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">○ NIK:</span>
+                            <span class="data-value">1234567891</span>
+                            <div class="status-indicator">
+                                <span class="status-icon warning"></span>
+                                <span class="status-text">exist, but not match</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <div class="page-header">• Page3</div>
+                        <div class="data-row">
+                            <span class="data-label">○ Type:</span>
+                            <span class="data-value">Unclassified</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">○ NIK:</span>
+                            <span class="data-value">-</span>
+                            <div class="status-indicator">
+                                <span class="status-icon error"></span>
+                                <span class="status-text">not exist</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <div class="page-header">• ....</div>
+                    </div>
+
+                    <div class="info-box">
+                        <p>You can inspect and edit the field for correction per document for any potential mismatch of the real data, and then perform recalculation (for this file only).</p>
+                        <p>The correction will be use for further training and model improvement.</p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-reject">Reject</button>
+                        <button class="btn btn-recalculate">Recalculate</button>
+                        <button class="btn btn-approve">Approve</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Walacakra - Expanding Your Document Horizons
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

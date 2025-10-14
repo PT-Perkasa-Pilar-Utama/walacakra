@@ -10,8 +10,9 @@
     <div class="main-container">
         <div class="header">
             <div class="logo">
-                <div class="logo-icon"></div>
-                <span>Bank Jakarta</span>
+                <div class="logo-icon">         
+                    <img src="../assets/bankdki.png" alt="" width="100">
+                </div>
             </div>
             <h1 class="header-title">Intelligent Document Processor</h1>
             <div class="status-badge">
@@ -21,37 +22,46 @@
         </div>
 
         <div class="content">
-            <div class="file-selector">
-                <div class="file-dropdown">
-                    <span>File1.pdf</span>
-                </div>
-            </div>
 
-            <div class="tabs">
-                <button class="tab active">Analysis</button>
-                <button class="tab">History</button>
+            <div class="selector">
+                <div class="file-selector">
+                    <div class="file-dropdown" id="fileDropdown">
+                        <span id="selectedFile">Pilih file</span>
+                    </div>
+                    <div class="file-options" id="fileOptions">
+                        <span>File1.pdf</span>
+                        <span>File2.pdf</span>
+                        <span>File3.pdf</span>
+                    </div>
+                </div>
+    
+                <div class="tabs">
+                    <button class="tab active">Analysis</button>
+                    <button class="tab">History</button>
+                </div>
             </div>
 
             <div class="main-content">
                 <div class="left-panel">
                     <div class="profile-card">
-                        <div class="profile-image">👤</div>
+                        <div class="profile-image"><img src="images/awalrius.png" alt=""></div>
+                        
                         <div class="field-group">
                             <div class="field-label">Name:</div>
-                            <div class="field-value">Fiqri</div>
+                            <div class="field-value">Awalrius Akhirius </div>
                         </div>
                         <div class="field-group">
                             <div class="field-label">NIK:</div>
-                            <div class="field-value">1234567890</div>
+                            <div class="field-value">1234567890123456</div>
                         </div>
                     </div>
 
                     <div class="document-preview">
                         <div class="preview-header">Page Preview</div>
                         <div class="preview-container" id="previewContainer">
-                            <img class="preview-image" id="previewImage" src="page1.png" alt="" width="500px">
+                            <img class="preview-image" id="previewImage" src="./images/page1.png" alt="" width="500px">
                             <div class="magnifier" id="magnifier">
-                                <img class="magnifier-content"src="page1.png" alt="" width="500px">
+                                <img class="magnifier-content"src="./images/page1.png" alt="" width="500px">
                             </div>
                             <div class="zoom-controls">
                                 <button class="zoom-btn" id="zoomIn">+</button>
@@ -76,56 +86,130 @@
                 <div class="right-panel">
                     <h2 class="summary-title">Summary:</h2>
                     
-                    <div class="page-item">
-                        <div class="page-header">• Page1</div>
-                        <div class="data-row">
-                            <span class="data-label">○ Type:</span>
-                            <span class="data-value">KTP</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">○ NIK:</span>
-                            <span class="data-value">1234567890</span>
-                            <div class="status-indicator">
-                                <span class="status-icon match"></span>
-                                <span class="status-text">match</span>
+                    <div class="page-item-container">
+                        <div class="page-item">
+                            <div class="page-header">• Page 1</div>
+                            <div class="data-row">
+                                <span class="data-label">○ Type:</span>
+                                <span class="data-value">KTP</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">○ NIK:</span>
+                                <span class="data-value">1234567890</span>
+                                <div class="status-indicator">
+                                    <span class="status-icon match"></span>
+                                    <span class="status-text">match</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="page-item">
-                        <div class="page-header">• Page2</div>
-                        <div class="data-row">
-                            <span class="data-label">○ Type:</span>
-                            <span class="data-value">KK</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">○ NIK:</span>
-                            <span class="data-value">1234567891</span>
-                            <div class="status-indicator">
-                                <span class="status-icon warning"></span>
-                                <span class="status-text">exist, but not match</span>
+    
+                        <div class="page-item">
+                            <div class="page-header">• Page 2</div>
+                            <div class="data-row">
+                                <span class="data-label">○ Type:</span>
+                                <span class="data-value">KK</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">○ NIK:</span>
+                                <span class="data-value">1234567891</span>
+                                <div class="status-indicator">
+                                    <span class="status-icon warning"></span>
+                                    <span class="status-text">exist, but not match</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="page-item">
-                        <div class="page-header">• Page3</div>
-                        <div class="data-row">
-                            <span class="data-label">○ Type:</span>
-                            <span class="data-value">Unclassified</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">○ NIK:</span>
-                            <span class="data-value">-</span>
-                            <div class="status-indicator">
-                                <span class="status-icon error"></span>
-                                <span class="status-text">not exist</span>
+    
+                        <div class="page-item">
+                            <div class="page-header">• Page 3</div>
+                            <div class="data-row">
+                                <span class="data-label">○ Type:</span>
+                                <span class="data-value">Unclassified</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">○ NIK:</span>
+                                <span class="data-value">-</span>
+                                <div class="status-indicator">
+                                    <span class="status-icon error"></span>
+                                    <span class="status-text">not exist</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                        <div class="page-item">
+                            <div class="page-header">• Page 4</div>
+                            <div class="data-row">
+                                <span class="data-label">○ Type:</span>
+                                <span class="data-value">Unclassified</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">○ NIK:</span>
+                                <span class="data-value">-</span>
+                                <div class="status-indicator">
+                                    <span class="status-icon error"></span>
+                                    <span class="status-text">not exist</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="page-item">
+                            <div class="page-header">• Page 5</div>
+                            <div class="data-row">
+                                <span class="data-label">○ Type:</span>
+                                <span class="data-value">Unclassified</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">○ NIK:</span>
+                                <span class="data-value">-</span>
+                                <div class="status-indicator">
+                                    <span class="status-icon error"></span>
+                                    <span class="status-text">not exist</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="page-item">
-                        <div class="page-header">• ....</div>
+                        <div class="page-item">
+                            <div class="page-header">• Page 6</div>
+                            <div class="data-row">
+                                <span class="data-label">○ Type:</span>
+                                <span class="data-value">Unclassified</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">○ NIK:</span>
+                                <span class="data-value">-</span>
+                                <div class="status-indicator">
+                                    <span class="status-icon error"></span>
+                                    <span class="status-text">not exist</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="page-item">
+                            <div class="page-header">• Page 7</div>
+                            <div class="data-row">
+                                <span class="data-label">○ Type:</span>
+                                <span class="data-value">Unclassified</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">○ NIK:</span>
+                                <span class="data-value">-</span>
+                                <div class="status-indicator">
+                                    <span class="status-icon error"></span>
+                                    <span class="status-text">not exist</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="page-item">
+                            <div class="page-header">• Page 8</div>
+                            <div class="data-row">
+                                <span class="data-label">○ Type:</span>
+                                <span class="data-value">Unclassified</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">○ NIK:</span>
+                                <span class="data-value">-</span>
+                                <div class="status-indicator">
+                                    <span class="status-icon error"></span>
+                                    <span class="status-text">not exist</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="info-box">

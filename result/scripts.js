@@ -111,3 +111,27 @@ document.querySelector('.btn-recalculate').addEventListener('click', () => {
     alert('Recalculating document analysis...');
     // Could show loading state and reprocess
 });
+
+
+// DROP DOWN FUNCTION
+const dropdown = document.getElementById("fileDropdown");
+const options = document.getElementById("fileOptions");
+const selected = document.getElementById("selectedFile");
+
+dropdown.addEventListener("click", () => {
+    options.classList.toggle("show");
+});
+
+options.querySelectorAll("span").forEach(option => {
+    option.addEventListener("click", () => {
+        selected.textContent = option.textContent;
+        options.classList.remove("show");
+    });
+});
+
+// Tutup dropdown kalau klik di luar
+document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target) && !options.contains(e.target)) {
+        options.classList.remove("show");
+    }
+});

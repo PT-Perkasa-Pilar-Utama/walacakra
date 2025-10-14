@@ -41,8 +41,8 @@
 <script setup>
 import { ref } from 'vue'
 
-const astroLogo = new URL('../assets/astro.svg', import.meta.url).href
-const background = new URL('../assets/background.svg', import.meta.url).href
+const astroLogo = '/astro.svg'
+const background = '/background.svg'
 </script>
 
 <style scoped>

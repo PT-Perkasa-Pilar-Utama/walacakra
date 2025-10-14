@@ -1,0 +1,10 @@
+---
+import Welcome from '../components/Welcome.vue';
+import Layout from '../layouts/Layout.vue';
+
+export const prerender = false;
+---
+
+<Layout>
+	<Welcome client:load />
+</Layout>

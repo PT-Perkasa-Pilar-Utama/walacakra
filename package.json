@@ -4,7 +4,13 @@
     "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
-    "hono": "^4.9.12"
+    "@google/genai": "^1.24.0",
+    "ai": "^5.0.70",
+    "hono": "^4.9.12",
+    "ollama": "^0.6.0",
+    "ppu-paddle-ocr": "^3.1.1",
+    "ppu-pdf": "^5.4.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/bun": "latest"

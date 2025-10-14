@@ -3,7 +3,10 @@
     "allow": [
       "Bash(bun run:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npx tsc:*)",
+      "Bash(bun add:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

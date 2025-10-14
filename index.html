@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intelligent Document Processor - Bank Jakarta</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <span>Bank Jakarta</span>
+        </div>
+      </div>
+
+      <h1>Intelligent Document Processor</h1>
+
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="12" cy="12" r="10" stroke="#667eea" stroke-width="2" />
+            <path
+              d="M12 8v8m0 0l-3-3m3 3l3-3"
+              stroke="#667eea"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="upload-text">Upload a document or bulk document</div>
+        <div class="upload-subtext">Click to browse or drag and drop</div>
+        <div class="file-name" id="fileName"></div>
+        <input
+          type="file"
+          class="file-input"
+          id="fileInput"
+          accept=".pdf,.doc,.docx,.jpg,.png"
+          multiple
+        />
+      </div>
+
+      <button class="btn-start" id="startBtn" disabled>
+        Start the process
+      </button>
+
+      <div class="slogan">Walacakra - Expanding Your Document Horizons</div>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div class="processing-overlay" id="processingOverlay">
+      <div class="processing-modal">
+        <button class="close-btn" id="closeBtn">×</button>
+        <div id="processingContent">
+          <div class="processing-filename">file1.pdf</div>
+          <div class="processing-steps">
+            <div class="processing-step" id="step1">
+              <span class="step-icon"></span>
+              <span>converting file</span>
+            </div>
+            <div class="processing-step" id="step2">
+              <span class="step-icon"></span>
+              <span>extracting text</span>
+            </div>
+            <div class="processing-step" id="step3">
+              <span class="step-icon"></span>
+              <span>finding pattern</span>
+            </div>
+            <div class="processing-step" id="step4">
+              <span class="step-icon"></span>
+              <span>...</span>
+            </div>
+          </div>
+          <div class="progress-text">Processing 102.3 s...</div>
+        </div>
+        <div id="successContent" style="display: none">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M5 13l4 4L19 7"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div class="success-message">All set. Redirecting...</div>
+          <div class="success-time">Done in 160 s</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

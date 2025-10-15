@@ -201,7 +201,7 @@ async function loadHistory(page = 1) {
             </thead>
             <tbody>
                 ${items.map(item => `
-                    <tr>
+                    <tr data-hash="${item.hash}" class="history-row">
                         <td>${item.filename}</td>
                         <td>${item.pages}</td>
                         <td><span class="status ${item.assessment.toLowerCase()}">${item.assessment}</span></td>
@@ -210,6 +210,41 @@ async function loadHistory(page = 1) {
                 `).join("")}
             </tbody>
         `;
+
+        // === Make rows clickable ===
+        table.querySelectorAll(".history-row").forEach(row => {
+            row.addEventListener("click", async () => {
+                const hash = row.getAttribute("data-hash");
+                const url = `${apiEndpoint}/api/v1/walacakra/history/${hash}`;
+
+                try {
+                    const res = await fetch(url, {
+                        headers: { Authorization: `Bearer ${bearerToken}` }
+                    });
+                    if (!res.ok) throw new Error(`Failed to fetch history detail: ${res.status}`);
+
+                    const json = await res.json();
+
+                    // Simpan ke localStorage dengan format yang sama seperti hasil processing biasa
+                    const stored = [{
+                        filename: json.metadata.document.filename,
+                        response: {
+                            metadata: json.metadata,
+                            data: json.data
+                        }
+                    }];
+
+                    localStorage.setItem("walacakra_results", JSON.stringify(stored));
+
+                    // Redirect ke halaman result.html
+                    window.location.href = "result.html";
+
+                } catch (err) {
+                    console.error("❌ Error loading history detail:", err);
+                    alert("Failed to load this document’s detail.");
+                }
+            });
+        });
 
         // Pagination controls
         const paginationDiv = document.createElement("div");
@@ -345,7 +380,7 @@ async function loadPDFViewer(fileUrl) {
 }
 
 // ==========================
-// = MAGNIFIER EFFECT ==
+// = MAGNIFIER EFFECT == NEED TO BE FIXED LATER
 // ==========================
 const pdfCanvas = document.getElementById("pdfCanvas");
 const magnifierCanvas = document.getElementById("magnifierCanvas");
@@ -357,21 +392,17 @@ pdfCanvas.addEventListener("mousemove", (e) => {
   const scaleX = pdfCanvas.width / rect.width;
   const scaleY = pdfCanvas.height / rect.height;
 
-  // koordinat posisi mouse relatif ke canvas sebenarnya
   const x = (e.clientX - rect.left) * scaleX;
   const y = (e.clientY - rect.top) * scaleY;
 
-  // ambil area kecil di canvas utama, lalu zoom
   const size = magnifierCanvas.width / zoomFactor;
   const startX = Math.max(0, x - size / 2);
   const startY = Math.max(0, y - size / 2);
 
-  // ambil data gambar dari canvas utama
   const imageData = pdfCanvas
     .getContext("2d")
     .getImageData(startX, startY, size, size);
 
-  // render area ke kaca pembesar
   magnifierCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
   magnifierCtx.putImageData(imageData, 0, 0);
   magnifierCtx.drawImage(
@@ -386,22 +417,22 @@ pdfCanvas.addEventListener("mousemove", (e) => {
     magnifierCanvas.height
   );
 
-  // posisikan kaca di sekitar kursor (supaya di atasnya sedikit)
-  const offsetX = magnifierCanvas.width / 1;
-  const offsetY = magnifierCanvas.height / 1;
-  magnifierCanvas.style.right = `20px`;
-  magnifierCanvas.style.bottom = `20px`;
-
-  magnifierCanvas.style.display = "block";
-});
-
-pdfCanvas.addEventListener("mouseenter", () => {
-  magnifierCanvas.style.display = "block";
-});
 pdfCanvas.addEventListener("mouseleave", () => {
   magnifierCanvas.style.display = "none";
 });
 
+
+
+  // === Posisi kaca pembesar pas di kursor ===
+  const parentRect = pdfCanvas.parentElement.getBoundingClientRect();
+  const centerX = e.clientX - parentRect.left - magnifierCanvas.width / 2;
+  const centerY = e.clientY - parentRect.top - magnifierCanvas.height / 2;
+
+  magnifierCanvas.style.left = `${centerX}px`;
+  magnifierCanvas.style.top = `${centerY}px`;
+
+  magnifierCanvas.style.display = "block";
+});
 
 // ===========================
 // === BUTTON ACTIONS ========

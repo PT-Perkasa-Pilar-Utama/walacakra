@@ -1,0 +1,37 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>MuPDF.js CDN Example</title>
+    </head>
+    <body>
+        <canvas id="pdf-canvas"></canvas>
+
+        <!-- Include MuPDF.js from a CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/mupdf-js@latest/dist/mupdf.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mupdf-js@latest/dist/mupdf-wasm.js"></script>
+
+        <script>
+            async function initializeMuPDF() {
+                const { createMuPdf } = window.mupdf; // Access the global mupdf object
+                const mupdf = await createMuPdf();
+
+                // Example: Render a PDF (you'd load a PDF from a URL or file)
+                // For a full example, refer to MuPDF.js documentation or examples
+                // const pdfData = await fetch('your-pdf-file.pdf').then(res => res.arrayBuffer());
+                // const doc = mupdf.openDocument(new Uint8Array(pdfData));
+                // const page = doc.loadPage(0);
+                // const pixmap = page.toPixmap(mupdf.Matrix.Identity, mupdf.ColorSpace.RGB);
+                // const canvas = document.getElementById('pdf-canvas');
+                // canvas.width = pixmap.width;
+                // canvas.height = pixmap.height;
+                // const ctx = canvas.getContext('2d');
+                // const imageData = new ImageData(new Uint8ClampedArray(pixmap.samples), pixmap.width, pixmap.height);
+                // ctx.putImageData(imageData, 0, 0);
+
+                console.log("MuPDF initialized successfully!");
+            }
+
+            initializeMuPDF();
+        </script>
+    </body>
+    </html>

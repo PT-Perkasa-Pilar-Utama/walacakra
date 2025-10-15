@@ -103,20 +103,31 @@ function handleFiles(files) {
 }
 
 startBtn.addEventListener('click', () => {
-    processingOverlay.classList.add('show');
+    const files = Array.from(fileInput.files);
+    if (files.length === 0) return alert("Please upload a file first!");
+
+    // Buat overlay baru dinamis
+    createProcessingOverlay(files[0].name);
+
+    // Ambil ulang referensi setelah overlay dibuat
+    const overlay = document.getElementById('processingOverlay');
+    overlay.classList.add('show');
+
+    // Jalankan simulasi
     simulateProcessing();
 });
-
 closeBtn.addEventListener('click', () => {
     processingOverlay.classList.remove('show');
     resetProcessing();
 });
 
 async function simulateProcessing() {
+    const startTime = Date.now(); // ⏱️ waktu mulai
     const files = Array.from(fileInput.files);
     const totalFiles = files.length;
     const endpoint = endpointInput.value.trim();
     const token = tokenInput.value.trim();
+
     
     if (totalFiles === 0) {
         alert("Please upload at least one file before starting the process.");
@@ -130,19 +141,19 @@ async function simulateProcessing() {
     const stepDiv = document.createElement("div");
     stepDiv.classList.add("processing-step", "active");
     stepDiv.innerHTML = `
-        <span class="step-icon"></span>
-        <span id="processing-status">Processing 0/${totalFiles} files...</span>
-        `;
-        stepsContainer.appendChild(stepDiv);
+    <span class="step-icon"></span>
+    <span id="processing-status">Processing 0/${totalFiles} files...</span>
+    `;
+    stepsContainer.appendChild(stepDiv);
         
         const results = []; // tempat nyimpen hasil tiap file
         
         // Kirim semua file ke API
-    const promises = files.map(async (file, index) => {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        try {
+        const promises = files.map(async (file, index) => {
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            try {
             const response = await fetch(`${endpoint}/api/v1/walacakra/process`, {
                 method: "POST",
                 body: formData,
@@ -152,10 +163,10 @@ async function simulateProcessing() {
             if (!response.ok) {
                 throw new Error(`Error processing ${file.name}: ${response.statusText}`);
             }
-
+            
             const result = await response.json();
             console.log(`✅ Processed: ${file.name}`, result);
-
+            
             // Simpan ke array hasil
             results.push({
                 filename: file.name,
@@ -168,13 +179,33 @@ async function simulateProcessing() {
                 error: error.message,
             });
         }
-
+        
         // Update tampilan progress
         document.getElementById("processing-status").textContent =
             `Processing ${index + 1}/${totalFiles} files...`;
     });
 
     await Promise.all(promises);
+
+    // Setelah await Promise.all(promises);
+    const overlay = document.getElementById('processingOverlay');
+    const stepsContainer_overlay = overlay.querySelector('.processing-steps');
+
+    // Buat isi hasil tiap file dari results[]
+    results.forEach((r) => {
+        const div = document.createElement('div');
+        div.classList.add('processing-step');
+        div.innerHTML = `
+            <div class="file-summary">
+                <strong>${r.filename}</strong><br>
+                ${r.error ? `<span class="error">❌ ${r.error}</span>` :
+                `<span class="ok">✅ ${r.response.status}</span><br>
+                <span>Assessment: ${r.response.data.assessment}</span><br>
+                <span>Pages: ${r.response.metadata.document.pages}</span>`}
+            </div>
+        `;
+        stepsContainer_overlay.appendChild(div);
+    });
 
     // Simpan semua hasil ke localStorage biar bisa diakses dari result.html
     localStorage.setItem("walacakra_results", JSON.stringify(results));
@@ -183,15 +214,23 @@ async function simulateProcessing() {
     stepDiv.classList.remove("active");
     stepDiv.classList.add("complete");
     stepDiv.querySelector("#processing-status").textContent =
-        `✅ All ${totalFiles} files processed successfully`;
+    `✅ All ${totalFiles} files processed successfully`;
 
-    showSuccess();
+    showSuccess(startTime);
 }
 
-function showSuccess() {
+function showSuccess(startTime) {
+    const overlay = document.getElementById('processingOverlay');
+    const processingContent = overlay.querySelector('#processingContent');
+    const successContent = overlay.querySelector('#successContent');
+    const successTime = overlay.querySelector('#successTime');
+
+    const durationSec = ((Date.now() - startTime) / 1000).toFixed(1); // ⏱️ hitung durasi real
+
     processingContent.style.display = 'none';
     successContent.style.display = 'block';
-    
+    successTime.textContent = `Done in ${durationSec} s`;
+
     setTimeout(() => {
         window.location.href = './result/result.html';
     }, 2000);
@@ -201,4 +240,52 @@ function showSuccess() {
 function resetProcessing() {
     processingContent.style.display = 'block';
     successContent.style.display = 'none';
+}
+
+
+// =========================
+// 🔹 Generate Overlay Dinamis
+// =========================
+function createProcessingOverlay(filename) {
+    // Hapus overlay lama jika ada
+    const oldOverlay = document.getElementById('processingOverlay');
+    if (oldOverlay) oldOverlay.remove();
+
+    // Buat elemen overlay utama
+    const overlay = document.createElement('div');
+    overlay.classList.add('processing-overlay');
+    overlay.id = 'processingOverlay';
+
+    overlay.innerHTML = `
+        <div class="processing-modal">
+            <button class="close-btn" id="closeBtn">×</button>
+            <div id="processingContent">
+                <div class="processing-filename">${filename}</div>
+                <div class="processing-steps"></div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+            <div id="successContent" style="display:none;">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="success-message">All set. Redirecting...</div>
+                <div class="success-time" id="successTime"></div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Rebind elemen dan event listener-nya
+    const closeBtn = overlay.querySelector('#closeBtn');
+    closeBtn.addEventListener('click', () => {
+        overlay.classList.remove('show');
+        resetProcessing();
+    });
+
+    // Simpan referensi ke global variabel
+    window.processingOverlay = overlay;
+    window.processingContent = overlay.querySelector('#processingContent');
+    window.successContent = overlay.querySelector('#successContent');
 }

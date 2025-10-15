@@ -305,10 +305,18 @@ body {
     padding: 20px;
     position: relative;
     z-index: 0;
-    height: 66vh;
     display: flex;
-    justify-content: space-between;
     flex-direction: column;
+    justify-content: flex-start;  /* ⬅️ ubah ini */
+    height: auto;                /* ⬅️ biar tinggi mengikuti isi */
+    max-height: 66vh;            /* opsional: kalau mau tetap dibatasi */
+    overflow-y: auto;    
+}
+
+.preview-container,
+.page-navigation,
+.nik-reading {
+    margin-bottom: 15px;
 }
 
 .preview-header {
@@ -507,9 +515,8 @@ body {
 }
 
 .page-item {
-    margin-bottom: 25px;
-    padding-bottom: 25px;
     border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 5px;
     display: flex;
     flex-direction: row;
     gap: 10px;
@@ -538,15 +545,16 @@ body {
 }
 
 .data-label {
-    font-size: 14px;
+    font-size: 16px;
     color: #64748b;
 }
 
 .data-value {
-    font-size: 14px;
+    font-size: 16px;
     color: #2c3e50;
     font-weight: 500;
     flex: 1;
+    padding: 5px;
 }
 
 .status-indicator {
@@ -778,6 +786,12 @@ body {
     margin-top: 15px;
 }
 
+/* Row clickable look */
+.history-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.05s ease;
+}
+
 /* .page-btn {
     background: linear-gradient(to right, #4f46e5, #6366f1);
     color: white;
@@ -866,17 +880,23 @@ body {
     color: #92400e;
 }
 
-/* PDF JS */
+/* pdf js */
+.preview-container {
+  position: relative; /* penting! supaya posisi absolute anaknya relatif ke sini */
+}
+
 #magnifierCanvas {
   position: absolute;
-  pointer-events: none; /* biar mouse tetap ke canvas bawah */
+  pointer-events: none;
   border: 2px solid rgba(0, 0, 0, 0.3);
-  /* border-radius: 50%; */
+  border-radius: 50%;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
   width: 150px;
   height: 150px;
   display: none;
-  mix-blend-mode: multiply;
+  z-index: 5;
+  background: white; /* <— ini bagian penting */
+  clip-path: circle(50%); /* biar bentuknya bener-bener bulat */
 }
 
 @media (max-width: 1024px) {

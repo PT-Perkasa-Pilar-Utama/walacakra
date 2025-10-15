@@ -7,7 +7,8 @@ const statusText = document.getElementById("statusText");
 const fileOptions = document.getElementById("fileOptions");
 const selectedFile = document.getElementById("selectedFile");
 const pageItemContainer = document.getElementById("pageItemContainer");
-const bearer_token = "ac199eee6b04e8ebd111d00253b0eec94bbf7afa1bba70c59606cdcd6f833464"
+const apiEndpoint = localStorage.getItem("apiEndpoint")
+const bearerToken = localStorage.getItem("apiToken")
 
 if (stored.length === 0) {
     alert("No processed file found. Please process a document first.");
@@ -35,7 +36,7 @@ async function fetchStorageFile(path, token) {
         // Pastikan URL lengkap
         const url = path.startsWith("http")
             ? path
-            : `http://localhost:4545/storage/${path}`;
+            : `${api_endpoint}/storage/${path}`;
 
         const headers = token
             ? { Authorization: `Bearer ${token}` }
@@ -62,7 +63,7 @@ async function loadFile(index) {
 
     selectedFile.textContent = item.filename;
 
-    const photoUrl = await fetchStorageFile(data.photo, bearer_token);
+    const photoUrl = await fetchStorageFile(data.photo, bearerToken);
     console.log(photoUrl)
     document.getElementById("profileImage").src = photoUrl || "../assets/default-avatar.png";
 

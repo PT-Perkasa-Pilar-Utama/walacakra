@@ -143,7 +143,7 @@ async function simulateProcessing() {
         formData.append("file", file);
 
         try {
-            const response = await fetch(`${endpoint}/walacakra/process`, {
+            const response = await fetch(`${endpoint}/api/v1/walacakra/process`, {
                 method: "POST",
                 body: formData,
                 headers: {"Authorization": "Bearer " + token}

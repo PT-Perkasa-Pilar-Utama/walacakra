@@ -75,6 +75,7 @@ async function loadFile(index) {
     magnifierImg.src = meta.document.url || "";
 
     // Name & NIK
+    // need to change this shit to canvas
     document.getElementById("fieldName").textContent = firstPage.name?.reading || "-";
     document.getElementById("fieldNIK").textContent = firstPage.nik?.reading || "-";
     document.getElementById("nikReading").textContent = firstPage.nik?.reading || "-";
@@ -124,14 +125,109 @@ document.addEventListener("click", (e) => {
     }
 });
 
-// ===========================
-// === TAB SWITCH (static) ===
-// ===========================
+const historyContainer = document.createElement("div");
+historyContainer.classList.add("history-container");
+historyContainer.style.display = "none"; // disembunyikan dulu
+document.querySelector(".right-panel").prepend(historyContainer);
+
+async function loadHistory(page = 1) {
+    historyContainer.innerHTML = `<div class="loading">Loading history...</div>`;
+
+    try {
+        const res = await fetch(`${apiEndpoint}/api/v1/walacakra/history?page=${page}`, {
+            headers: {
+                Authorization: `Bearer ${bearerToken}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!res.ok) throw new Error(`Failed to fetch history (${res.status})`);
+        const json = await res.json();
+        const items = json?.data?.items || [];
+        const pagination = json?.metadata?.pagination || {};
+
+        if (items.length === 0) {
+            historyContainer.innerHTML = `<p class="no-history">No history records found.</p>`;
+            return;
+        }
+
+        const table = document.createElement("table");
+        table.classList.add("history-table");
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Pages</th>
+                    <th>Status</th>
+                    <th>Processed At</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${items.map(item => `
+                    <tr>
+                        <td>${item.filename}</td>
+                        <td>${item.pages}</td>
+                        <td><span class="status ${item.assessment.toLowerCase()}">${item.assessment}</span></td>
+                        <td>${new Date(item.processedAt).toLocaleString()}</td>
+                    </tr>
+                `).join("")}
+            </tbody>
+        `;
+
+        // Pagination controls
+        const paginationDiv = document.createElement("div");
+        paginationDiv.classList.add("pagination-controls");
+        paginationDiv.innerHTML = `
+            <button class="page-btn" id="prevPage" ${!pagination.hasPrev ? "disabled" : ""}>◀</button>
+            <span class="page-info">Page ${pagination.page} of ${pagination.totalPages}</span>
+            <button class="page-btn" id="nextPage" ${!pagination.hasNext ? "disabled" : ""}>▶</button>
+        `;
+
+        paginationDiv.querySelector("#prevPage").addEventListener("click", () => {
+            if (pagination.hasPrev) loadHistory(pagination.page - 1);
+        });
+        paginationDiv.querySelector("#nextPage").addEventListener("click", () => {
+            if (pagination.hasNext) loadHistory(pagination.page + 1);
+        });
+
+        // Replace content
+        historyContainer.innerHTML = "";
+        historyContainer.appendChild(table);
+        historyContainer.appendChild(paginationDiv);
+
+    } catch (err) {
+        console.error("❌ Error loading history:", err);
+        historyContainer.innerHTML = `<p class="error">Failed to load history data.</p>`;
+    }
+}
+
+// ===============================
+// === TAB SWITCH (enhanced) =====
+// ===============================
 const tabs = document.querySelectorAll('.tab');
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
+
+        const tabName = tab.textContent.trim();
+
+        if (tabName === "Analysis") {
+            // tampilkan panel analisis
+            document.querySelector(".summary-title").style.display = "block";
+            document.getElementById("pageItemContainer").style.display = "block";
+            document.querySelector(".info-box").style.display = "block";
+            document.querySelector(".action-buttons").style.display = "flex";
+            historyContainer.style.display = "none";
+        } else if (tabName === "History") {
+            // sembunyikan konten analisis
+            document.querySelector(".summary-title").style.display = "none";
+            document.getElementById("pageItemContainer").style.display = "none";
+            document.querySelector(".info-box").style.display = "none";
+            document.querySelector(".action-buttons").style.display = "none";
+            historyContainer.style.display = "block";
+            loadHistory();
+        }
     });
 });
 

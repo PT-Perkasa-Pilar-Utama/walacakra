@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document Analysis - Bank Jakarta</title>
+    <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -35,6 +36,8 @@
                     <button class="tab active">Analysis</button>
                     <button class="tab">History</button>
                 </div>
+
+                <div class="assessment-status" id="assessmentStatus"></div>
             </div>
 
             <div class="main-content">
@@ -44,21 +47,19 @@
                         
                         <div class="field-group">
                             <div class="field-label">Name:</div>
-                            <div class="field-value" id="fieldName">-</div>
+                            <div class="field-value" id="fieldName" contenteditable="true">-</div>
                         </div>
                         <div class="field-group">
                             <div class="field-label">NIK:</div>
-                            <div class="field-value" id="fieldNIK">-</div>
+                            <div class="field-value" id="fieldNIK" contenteditable="true">-</div>
                         </div>
                     </div>
 
                     <div class="document-preview">
                         <div class="preview-header">Page Preview</div>
                         <div class="preview-container" id="previewContainer">
-                            <img class="preview-image" id="previewImage" src="" alt="" width="500px">
-                            <div class="magnifier" id="magnifier">
-                                <img class="magnifier-content" src="" alt="" width="500px">
-                            </div>
+                            <canvas id="pdfCanvas" width="500"></canvas>
+                            <canvas id="magnifierCanvas" width="150" height="150"></canvas>
                             <div class="zoom-controls">
                                 <button class="zoom-btn" id="zoomIn">+</button>
                                 <button class="zoom-btn" id="zoomOut">−</button>
@@ -72,7 +73,7 @@
                         </div>
                         <div class="nik-reading">
                             <div class="nik-label">NIK Reading:</div>
-                            <div class="nik-value" id="nikReading">-</div>
+                            <div class="nik-value" id="nikReading" contenteditable="true">-</div>
                         </div>
                     </div>
                 </div>

@@ -68,19 +68,41 @@ async function loadFile(index) {
 
     selectedFile.textContent = item.filename;
 
+    // === Update assessment badge ===
+    const assessmentStatus = document.getElementById("assessmentStatus");
+    const assessment = data.assessment?.toLowerCase() || "pending";
+
+    assessmentStatus.textContent = assessment.toUpperCase();
+    assessmentStatus.className = `assessment-status ${assessment}`;
+
+    // === Hide or show action buttons ===
+    const actionButtons = document.querySelector(".action-buttons");
+
+    if (["approved", "rejected"].includes(assessment)) {
+        actionButtons.style.display = "none";
+    } else {
+        actionButtons.style.display = "flex";
+    }
+
     const photoUrl = await fetchStorageFile(data.photo, bearerToken);
     console.log(photoUrl)
     document.getElementById("profileImage").src = photoUrl || "../assets/default-avatar.png";
 
-    // Show first page in preview
-    const firstPage = data.pages[0];
-    const previewImg = document.getElementById("previewImage");
-    const magnifierImg = document.querySelector(".magnifier-content");
-    previewImg.src = meta.document.url || "";
-    magnifierImg.src = meta.document.url || "";
+    // === PDF preview ===
+    try {
+        if (meta?.document?.url) {
+            await loadPDFViewer(meta.document.url);
+            // await loadPDFViewer("./test.pdf");
+        } else {
+            console.warn("No PDF URL found in metadata");
+        }
+    } catch (err) {
+        console.error("❌ Error loading PDF preview:", err);
+    }
 
     // Name & NIK
     // need to change this shit to canvas
+    const firstPage = data.pages[0]; // ✅ tambahkan ini
     document.getElementById("fieldName").textContent = firstPage.name?.reading || "-";
     document.getElementById("fieldNIK").textContent = firstPage.nik?.reading || "-";
     document.getElementById("nikReading").textContent = firstPage.nik?.reading || "-";
@@ -135,6 +157,10 @@ document.addEventListener("click", (e) => {
         fileOptions.classList.remove("show");
     }
 });
+
+// ===========================
+// === HISTORY CODE ====
+// ===========================
 
 const historyContainer = document.createElement("div");
 historyContainer.classList.add("history-container");
@@ -213,7 +239,7 @@ async function loadHistory(page = 1) {
 }
 
 // ===============================
-// === TAB SWITCH (enhanced) =====
+// ========= TAB SWITCH ==========
 // ===============================
 const tabs = document.querySelectorAll('.tab');
 tabs.forEach(tab => {
@@ -243,49 +269,139 @@ tabs.forEach(tab => {
 });
 
 // ==========================
-// === ZOOM + MAGNIFIER ====
+// = PDF JS IMPLEMENTATION ==
 // ==========================
-const previewContainer = document.getElementById('previewContainer');
-const previewImage = document.getElementById('previewImage');
-const magnifier = document.getElementById('magnifier');
-let isMouseOver = false;
-let currentZoom = 1;
 
-previewContainer.addEventListener('mouseenter', () => {
-    isMouseOver = true;
-    magnifier.classList.add('active');
-});
-previewContainer.addEventListener('mouseleave', () => {
-    isMouseOver = false;
-    magnifier.classList.remove('active');
-});
-previewContainer.addEventListener('mousemove', (e) => {
-    if (!isMouseOver) return;
-    const rect = previewContainer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    magnifier.style.left = (x - 75) + 'px';
-    magnifier.style.top = (y - 75) + 'px';
-    const magnifierContent = magnifier.querySelector('.magnifier-content');
-    magnifierContent.style.transform = `translate(-${x * 2}px, -${y * 2}px) scale(2)`;
-});
+async function loadPDFViewer(fileUrl) {
 
-document.getElementById('zoomIn').addEventListener('click', () => {
-    if (currentZoom < 3) {
-        currentZoom += 0.5;
-        previewImage.style.transform = `scale(${currentZoom})`;
+    // pastikan PDF.js ada di global
+    if (typeof pdfjsLib === "undefined") {
+        console.error("⚠️ PDF.js belum termuat — cek urutan <script> di HTML");
+    } 
+    else {
+    // atur lokasi worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 
+    "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
     }
-});
-document.getElementById('zoomOut').addEventListener('click', () => {
-    if (currentZoom > 0.5) {
-        currentZoom -= 0.5;
-        previewImage.style.transform = `scale(${currentZoom})`;
-    }
-});
-document.getElementById('zoomReset').addEventListener('click', () => {
+    
+  const token = localStorage.getItem("apiToken");
+  const res = await fetch(fileUrl, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error(`Gagal fetch PDF: ${res.status} ${res.statusText}`);
+  const pdfData = await res.arrayBuffer();
+
+  // init PDF.js
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 
+    "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+  const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+
+  // setup state
+  let currentPage = 1;
+  const canvas = document.getElementById("pdfCanvas");
+  const ctx = canvas.getContext("2d");
+  const pageInfo = document.getElementById("pageInfo");
+
+  async function renderPage(num) {
+    const page = await pdf.getPage(num);
+    const viewport = page.getViewport({ scale: currentZoom });
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    pageInfo.textContent = `${num} / ${pdf.numPages}`;
+  }
+
+  // first render
+  currentZoom = 1;
+  await renderPage(currentPage);
+
+  // zoom & nav buttons
+  document.getElementById("zoomIn").onclick = async () => {
+    currentZoom = Math.min(3, currentZoom + 0.25);
+    await renderPage(currentPage);
+  };
+  document.getElementById("zoomOut").onclick = async () => {
+    currentZoom = Math.max(0.5, currentZoom - 0.25);
+    await renderPage(currentPage);
+  };
+  document.getElementById("zoomReset").onclick = async () => {
     currentZoom = 1;
-    previewImage.style.transform = 'scale(1)';
+    await renderPage(currentPage);
+  };
+
+  const navBtns = document.querySelectorAll(".page-navigation .page-btn");
+  navBtns[0].onclick = async () => {
+    if (currentPage > 1) {
+      currentPage--;
+      await renderPage(currentPage);
+    }
+  };
+  navBtns[1].onclick = async () => {
+    if (currentPage < pdf.numPages) {
+      currentPage++;
+      await renderPage(currentPage);
+    }
+  };
+}
+
+// ==========================
+// = MAGNIFIER EFFECT ==
+// ==========================
+const pdfCanvas = document.getElementById("pdfCanvas");
+const magnifierCanvas = document.getElementById("magnifierCanvas");
+const magnifierCtx = magnifierCanvas.getContext("2d");
+const zoomFactor = 2.0; // seberapa besar pembesaran
+
+pdfCanvas.addEventListener("mousemove", (e) => {
+  const rect = pdfCanvas.getBoundingClientRect();
+  const scaleX = pdfCanvas.width / rect.width;
+  const scaleY = pdfCanvas.height / rect.height;
+
+  // koordinat posisi mouse relatif ke canvas sebenarnya
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+
+  // ambil area kecil di canvas utama, lalu zoom
+  const size = magnifierCanvas.width / zoomFactor;
+  const startX = Math.max(0, x - size / 2);
+  const startY = Math.max(0, y - size / 2);
+
+  // ambil data gambar dari canvas utama
+  const imageData = pdfCanvas
+    .getContext("2d")
+    .getImageData(startX, startY, size, size);
+
+  // render area ke kaca pembesar
+  magnifierCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
+  magnifierCtx.putImageData(imageData, 0, 0);
+  magnifierCtx.drawImage(
+    pdfCanvas,
+    startX,
+    startY,
+    size,
+    size,
+    0,
+    0,
+    magnifierCanvas.width,
+    magnifierCanvas.height
+  );
+
+  // posisikan kaca di sekitar kursor (supaya di atasnya sedikit)
+  const offsetX = magnifierCanvas.width / 1;
+  const offsetY = magnifierCanvas.height / 1;
+  magnifierCanvas.style.right = `20px`;
+  magnifierCanvas.style.bottom = `20px`;
+
+  magnifierCanvas.style.display = "block";
 });
+
+pdfCanvas.addEventListener("mouseenter", () => {
+  magnifierCanvas.style.display = "block";
+});
+pdfCanvas.addEventListener("mouseleave", () => {
+  magnifierCanvas.style.display = "none";
+});
+
 
 // ===========================
 // === BUTTON ACTIONS ========

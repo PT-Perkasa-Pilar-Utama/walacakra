@@ -1,3 +1,8 @@
+// =========================
+// === CONFIGURABLE LIST ===
+// =========================
+const DOCUMENT_TYPES = ["KTP", "KK", "Sertificate", "Unclassified"];
+
 // ===================
 // === LOAD RESULT ===
 // ===================
@@ -93,21 +98,27 @@ async function loadFile(index) {
             ? "exist, but not match"
             : "not exist";
 
-        pageItem.innerHTML = `
-            <div class="page-header">• Page ${page.pageNumber}</div>
-            <div class="data-row">
-                <span class="data-label">○ Type:</span>
-                <span class="data-value">${page.docType.correction || page.docType.reading}</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">○ NIK:</span>
-                <span class="data-value">${page.nik.reading || "-"}</span>
-                <div class="status-indicator">
-                    <span class="status-icon ${matchStatus}"></span>
-                    <span class="status-text">${matchText}</span>
+            pageItem.innerHTML = `
+                <div class="page-header">• Page ${page.pageNumber}</div>
+                <div class="data-row">
+                    <span class="data-label">○ Type:</span>
+                    <select class="data-value type-select">
+                        ${DOCUMENT_TYPES.map(
+                            type => `<option value="${type}" ${
+                                (page.docType.correction || page.docType.reading) === type ? "selected" : ""
+                            }>${type}</option>`
+                        ).join("")}
+                    </select>
                 </div>
-            </div>
-        `;
+                <div class="data-row">
+                    <span class="data-label">○ NIK:</span>
+                    <span class="data-value">${page.nik.reading || "-"}</span>
+                    <div class="status-indicator">
+                        <span class="status-icon ${matchStatus}"></span>
+                        <span class="status-text">${matchText}</span>
+                    </div>
+                </div>
+            `;
         pageItemContainer.appendChild(pageItem);
     });
 }

@@ -818,6 +818,24 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
+
+/* DROPDOWN PAGE TYPE */
+
+.type-select {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.type-select:hover {
+    background: #f3f4f6;
+}
+
 @media (max-width: 1024px) {
     .main-content {
         grid-template-columns: 1fr;

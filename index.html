@@ -7,6 +7,23 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="api-panel">
+        <div class="api-header" id="apiHeader">
+            <span>⚙️ API Configuration</span>
+            <span class="toggle-icon" id="toggleIcon">▼</span>
+        </div>
+        <div class="api-body" id="apiBody">
+            <div class="input-group">
+                <label for="endpointInput">API Endpoint:</label>
+                <input type="text" id="endpointInput" placeholder="https://api.example.com/process">
+            </div>
+            <div class="input-group">
+                <label for="tokenInput">Bearer Token:</label>
+                <input type="text" id="tokenInput" placeholder="Enter your bearer token">
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <div class="logo">
@@ -15,6 +32,7 @@
         </div>
 
         <h1>Intelligent Document Processor</h1>
+
 
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">

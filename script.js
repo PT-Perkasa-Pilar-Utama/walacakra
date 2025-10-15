@@ -6,7 +6,7 @@ const processingOverlay = document.getElementById('processingOverlay');
 const closeBtn = document.getElementById('closeBtn');
 const processingContent = document.getElementById('processingContent');
 const successContent = document.getElementById('successContent');
-
+const bearer_token = ""
 uploadArea.addEventListener('click', () => fileInput.click());
 
 uploadArea.addEventListener('dragover', (e) => {
@@ -48,28 +48,78 @@ closeBtn.addEventListener('click', () => {
     resetProcessing();
 });
 
-function simulateProcessing() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    let currentStep = 0;
+async function simulateProcessing() {
+    const files = Array.from(fileInput.files);
+    const totalFiles = files.length;
 
-    steps.forEach(step => {
-        document.getElementById(step).classList.remove('active', 'complete');
+    if (totalFiles === 0) {
+        alert("Please upload at least one file before starting the process.");
+        return;
+    }
+
+    const stepsContainer = document.querySelector(".processing-steps");
+    stepsContainer.innerHTML = "";
+
+    // Tambahkan satu baris step dinamis
+    const stepDiv = document.createElement("div");
+    stepDiv.classList.add("processing-step", "active");
+    stepDiv.innerHTML = `
+        <span class="step-icon"></span>
+        <span id="processing-status">Processing 0/${totalFiles} files...</span>
+    `;
+    stepsContainer.appendChild(stepDiv);
+
+    const results = []; // tempat nyimpen hasil tiap file
+
+    // Kirim semua file ke API
+    const promises = files.map(async (file, index) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const response = await fetch("http://localhost:4545/api/v1/walacakra/process", {
+                method: "POST",
+                body: formData,
+                headers: {"Authorization": "Bearer " + bearer_token}
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error processing ${file.name}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log(`✅ Processed: ${file.name}`, result);
+
+            // Simpan ke array hasil
+            results.push({
+                filename: file.name,
+                response: result,
+            });
+        } catch (error) {
+            console.error(`❌ Failed: ${file.name}`, error);
+            results.push({
+                filename: file.name,
+                error: error.message,
+            });
+        }
+
+        // Update tampilan progress
+        document.getElementById("processing-status").textContent =
+            `Processing ${index + 1}/${totalFiles} files...`;
     });
 
-    const interval = setInterval(() => {
-        if (currentStep > 0) {
-            document.getElementById(steps[currentStep - 1]).classList.remove('active');
-            document.getElementById(steps[currentStep - 1]).classList.add('complete');
-        }
+    await Promise.all(promises);
 
-        if (currentStep < steps.length) {
-            document.getElementById(steps[currentStep]).classList.add('active');
-            currentStep++;
-        } else {
-            clearInterval(interval);
-            showSuccess();
-        }
-    }, 2000);
+    // Simpan semua hasil ke localStorage biar bisa diakses dari result.html
+    localStorage.setItem("walacakra_results", JSON.stringify(results));
+
+    // Ubah tampilan jadi sukses
+    stepDiv.classList.remove("active");
+    stepDiv.classList.add("complete");
+    stepDiv.querySelector("#processing-status").textContent =
+        `✅ All ${totalFiles} files processed successfully`;
+
+    showSuccess();
 }
 
 function showSuccess() {
@@ -77,9 +127,10 @@ function showSuccess() {
     successContent.style.display = 'block';
     
     setTimeout(() => {
-        window.location.href = 'page2.html';
+        window.location.href = './result/result.html';
     }, 2000);
 }
+
 
 function resetProcessing() {
     processingContent.style.display = 'block';

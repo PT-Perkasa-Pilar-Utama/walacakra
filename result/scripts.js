@@ -135,3 +135,34 @@ document.addEventListener("click", (e) => {
         options.classList.remove("show");
     }
 });
+
+
+// 🧩 Mock data dulu (nanti bisa diganti hasil fetch API)
+const mockDocumentTypes = [
+{ id: "ktp", name: "KTP" },
+{ id: "kk", name: "KK" },
+{ id: "sim", name: "SIM" },
+{ id: "passport", name: "Passport" },
+{ id: "akta", name: "Akta Kelahiran" },
+];
+
+function loadDocumentTypes() {
+    const dropdown = document.getElementById("type-select");
+    dropdown.innerHTML = ""; // Bersihkan isi sebelumnya
+
+    mockDocumentTypes.forEach((doc, index) => {
+        const opt = document.createElement("option");
+        opt.value = doc.id;
+        opt.textContent = doc.name;
+        if (index === 0) opt.selected = true; // default pilih pertama
+        dropdown.appendChild(opt);
+    });
+}
+
+loadDocumentTypes();
+
+// 🧠 Ambil value yang dipilih
+const dropdown_type = document.getElementById("type-select");
+dropdown_type.addEventListener("change", (e) => {
+console.log("User pilih:", e.target.value);
+});

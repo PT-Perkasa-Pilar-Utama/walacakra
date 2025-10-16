@@ -298,7 +298,7 @@ async function simulateProcessing() {
     stepsContainer_overlay.appendChild(div);
   });
 
-  // Simpan semua hasil ke localStorage biar bisa diakses dari result.html
+  // Simpan semua hasil ke localStorage biar bisa diakses dari result/index.html
   localStorage.setItem("walacakra_results", JSON.stringify(results));
 
   // Ubah tampilan jadi sukses
@@ -322,7 +322,7 @@ function showSuccess(startTime) {
   processingContent.style.display = "none";
   successContent.style.display = "block";
   successTime.textContent = `Done in ${durationSec} s`;
-  window.location.href = "./result/result.html";
+  window.location.href = "./result/index.html";
 }
 
 function resetProcessing() {

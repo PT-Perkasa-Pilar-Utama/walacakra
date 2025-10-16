@@ -173,7 +173,11 @@ function handleFiles(files) {
     const fileNames = Array.from(files)
       .map((f) => f.name)
       .join(", ");
-    fileName.textContent = `Selected: ${fileNames}`.substring(100) + "...";
+
+    let texts = `Selected: ${fileNames}`;
+
+    fileName.textContent =
+      texts.length > 100 ? texts.substring(0, 100) + "..." : texts;
     fileName.classList.add("show");
     startBtn.disabled = false;
     uploadArea.classList.add("active");

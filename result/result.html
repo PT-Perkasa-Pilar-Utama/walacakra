@@ -1,119 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document Analysis - Bank Jakarta</title>
     <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="main-container">
-        <div class="header">
-            <div class="logo">
-                <div class="logo-icon">         
-                    <img src="../assets/bankdki.png" alt="" width="100">
-                </div>
+      <div class="header">
+        <div class="logo">
+          <a href="/">
+            <div class="logo-icon">
+              <img src="../assets/bankdki.png" alt="" width="100" />
             </div>
-            <h1 class="header-title">Intelligent Document Processor</h1>
-            <div class="status-badge">
-                <div class="checkmark"></div>
-                <span id="statusText">Processed 0 file</span>
+          </a>
+        </div>
+        <h1 class="header-title">Intelligent Document Processor</h1>
+        <div class="status-badge">
+          <div class="checkmark"></div>
+          <span id="statusText">Processed 0 file</span>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="selector">
+          <div class="file-selector">
+            <div class="file-dropdown" id="fileDropdown">
+              <span id="selectedFile">Pilih file</span>
             </div>
+            <div class="file-options" id="fileOptions"></div>
+          </div>
+
+          <div class="tabs">
+            <button class="tab active">Analysis</button>
+            <button class="tab">History</button>
+          </div>
+
+          <div class="assessment-status" id="assessmentStatus"></div>
         </div>
 
-        <div class="content">
+        <div class="main-content">
+          <div class="left-panel">
+            <div class="profile-card">
+              <div class="profile-image">
+                <img id="profileImage" src="" alt="" />
+              </div>
 
-            <div class="selector">
-                <div class="file-selector">
-                    <div class="file-dropdown" id="fileDropdown">
-                        <span id="selectedFile">Pilih file</span>
-                    </div>
-                    <div class="file-options" id="fileOptions"></div>
-                </div>
-    
-                <div class="tabs">
-                    <button class="tab active">Analysis</button>
-                    <button class="tab">History</button>
-                </div>
-
-                <div class="assessment-status" id="assessmentStatus"></div>
+              <div class="field-group">
+                <div class="field-label">Name:</div>
+                <div class="field-value" id="fieldName">-</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">NIK:</div>
+                <div class="field-value" id="fieldNIK">-</div>
+              </div>
             </div>
 
-            <div class="main-content">
-                <div class="left-panel">
-                    <div class="profile-card">
-                        <div class="profile-image"><img id="profileImage" src="" alt=""></div>
-                        
-                        <div class="field-group">
-                            <div class="field-label">Name:</div>
-                            <div class="field-value" id="fieldName">-</div>
-                        </div>
-                        <div class="field-group">
-                            <div class="field-label">NIK:</div>
-                            <div class="field-value" id="fieldNIK">-</div>
-                        </div>
-                    </div>
-
-                    <div class="document-preview">
-                        <div class="preview-header">Page Preview</div>
-                        <div class="preview-container" id="previewContainer">
-                            <canvas id="pdfCanvas" width="500"></canvas>
-                            <canvas id="magnifierCanvas" width="150" height="150"></canvas>
-                            <div class="zoom-controls">
-                                <button class="zoom-btn" id="zoomIn">+</button>
-                                <button class="zoom-btn" id="zoomOut">−</button>
-                                <button class="zoom-btn" id="zoomReset">⟲</button>
-                            </div>
-                        </div>
-                        <div class="page-navigation">
-                            <button class="page-btn">◀</button>
-                            <span class="page-info" id="pageInfo">1 / 1</span>
-                            <button class="page-btn">▶</button>
-                        </div>
-                    </div>
+            <div class="document-preview">
+              <div class="preview-header">Page Preview</div>
+              <div class="preview-container" id="previewContainer">
+                <canvas id="pdfCanvas" width="500"></canvas>
+                <canvas id="magnifierCanvas" width="150" height="150"></canvas>
+                <div class="zoom-controls">
+                  <button class="zoom-btn" id="zoomIn">+</button>
+                  <button class="zoom-btn" id="zoomOut">−</button>
+                  <button class="zoom-btn" id="zoomReset">⟲</button>
                 </div>
-
-                <div class="right-panel">
-                    <h2 class="summary-title">Summary:</h2>
-                    <div class="match-summary" id="matchSummary"></div>
-                    
-                    <div class="page-item-container" id="pageItemContainer"></div>
-                    <div class="info-box">
-                        <p>You can inspect and edit the field for correction per document for any potential mismatch of the real data, and then perform recalculation (for this file only).</p>
-                        <p>The correction will be use for further training and model improvement.</p>
-                    </div>
-
-                    <div class="action-buttons">
-                        <button class="btn btn-reject">Reject</button>
-                        <button class="btn btn-recalculate">Recalculate</button>
-                        <button class="btn btn-approve">Approve</button>
-                    </div>
-                </div>
+              </div>
+              <div class="page-navigation">
+                <button class="page-btn">◀</button>
+                <span class="page-info" id="pageInfo">1 / 1</span>
+                <button class="page-btn">▶</button>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <div class="footer">
-            Walacakra - Expanding Your Document Horizons
+          <div class="right-panel">
+            <h2 class="summary-title">Summary:</h2>
+            <div class="match-summary" id="matchSummary"></div>
+
+            <div class="page-item-container" id="pageItemContainer"></div>
+            <div class="info-box">
+              <p>
+                You can inspect and edit the field for correction per document
+                for any potential mismatch of the real data, and then perform
+                recalculation (for this file only).
+              </p>
+              <p>
+                The correction will be use for further training and model
+                improvement.
+              </p>
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn btn-reject">Reject</button>
+              <button class="btn btn-recalculate">Recalculate</button>
+              <button class="btn btn-approve">Approve</button>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="footer">Walacakra - Expanding Your Document Horizons</div>
     </div>
 
     <!-- Modal Container -->
     <div class="modal-overlay" id="modalOverlay">
-        <div class="modal" id="modal">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Information</h3>
-                <button class="modal-close" id="modalClose">&times;</button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <p id="modalMessage">Message here</p>
-            </div>
-            <div class="modal-footer" id="modalFooter">
-                <button class="btn btn-primary" id="modalConfirmBtn">OK</button>
-            </div>
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalTitle">Information</h3>
+          <button class="modal-close" id="modalClose">&times;</button>
         </div>
+        <div class="modal-body" id="modalBody">
+          <p id="modalMessage">Message here</p>
+        </div>
+        <div class="modal-footer" id="modalFooter">
+          <button class="btn btn-primary" id="modalConfirmBtn">OK</button>
+        </div>
+      </div>
     </div>
 
     <script src="scripts.js"></script>
-</body>
+  </body>
 </html>

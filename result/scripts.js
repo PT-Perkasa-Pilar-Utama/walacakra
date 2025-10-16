@@ -150,6 +150,7 @@ async function fetchFile(path, token) {
   }
 }
 
+
 // ===========================
 // === LOAD SINGLE FILE UI ===
 // ===========================
@@ -224,35 +225,42 @@ async function loadFile(index) {
       matchStatus = "error";
     }
 
-    // === Buat markup awal ===
+    // === Buat markup awal dengan accordion ===
     let innerHTML = `
-            <div class="page-header">• Page ${page.pageNumber + 1}</div>
-            <div class="data-row">
-                <span class="data-label">○ Type:</span>
-                <select class="data-value type-select">
-                    ${DOCUMENT_TYPES.map(
-                      (type) =>
-                        `<option value="${type}" ${
-                          (page.docType.correction || page.docType.reading) ===
-                          type
-                            ? "selected"
-                            : ""
-                        }>${type}</option>`
-                    ).join("")}
-                </select>
+            <div class="page-header-wrapper" data-page="${page.pageNumber}">
+                <div class="page-header">
+                    • Page ${page.pageNumber + 1}
+                    <div class="status-indicator">
+                        <span class="status-icon ${matchStatus}"></span>
+                        <span class="status-text">${matchText}</span>
+                    </div>
+                </div>
+                <button class="accordion-toggle" data-page="${page.pageNumber}">
+                    <svg class="accordion-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
             </div>
-        `;
-
-    // === Tambahkan kolom NIK (selalu tampil) ===
-    innerHTML += `
-            <div class="data-row">
-                <span class="data-label">○ NIK:</span>
-                <span class="data-value nik-field" contenteditable="true" style="background:white;">
-                    ${page.nik.correction || page.nik.reading || "-"}
-                </span>
-                <div class="status-indicator">
-                    <span class="status-icon ${matchStatus}"></span>
-                    <span class="status-text">${matchText}</span>
+            <div class="accordion-content collapsed" data-page="${page.pageNumber}">
+                <div class="data-row">
+                    <span class="data-label">○ Type:</span>
+                    <select class="data-value type-select">
+                        ${DOCUMENT_TYPES.map(
+                          (type) =>
+                            `<option value="${type}" ${
+                              (page.docType.correction || page.docType.reading) ===
+                              type
+                                ? "selected"
+                                : ""
+                            }>${type}</option>`
+                        ).join("")}
+                    </select>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">○ NIK:</span>
+                    <span class="data-value nik-field" contenteditable="true" style="background:white;">
+                        ${page.nik.correction || page.nik.reading || "-"}
+                    </span>
                 </div>
             </div>
         `;
@@ -260,6 +268,9 @@ async function loadFile(index) {
     pageItem.innerHTML = innerHTML;
     pageItemContainer.appendChild(pageItem);
   });
+
+  // Add accordion functionality
+  setupAccordionListeners();
 
   // === Hitung summary match berdasarkan rule ===
   const ktpPage = data.pages.find((p) => p.docType.reading === "KTP");
@@ -280,6 +291,44 @@ async function loadFile(index) {
   document.getElementById(
     "matchSummary"
   ).textContent = `🔍 ${nikMatch}/${totalPages} pages have NIK matching the main KTP`;
+}
+
+// ===========================
+// === ACCORDION FUNCTIONALITY ===
+// ===========================
+function setupAccordionListeners() {
+  const pageHeaders = document.querySelectorAll('.page-header-wrapper');
+  const accordionToggles = document.querySelectorAll('.accordion-toggle');
+
+  // Add click event to entire page header (not just the toggle button)
+  pageHeaders.forEach((header, index) => {
+    header.addEventListener('click', function(e) {
+      // Prevent event from firing twice if toggle button was clicked
+      e.stopPropagation();
+
+      const pageNumber = this.getAttribute('data-page');
+      const content = document.querySelector(`.accordion-content[data-page="${pageNumber}"]`);
+      const icon = this.querySelector('.accordion-icon');
+      const toggle = this.querySelector('.accordion-toggle');
+
+      if (content.classList.contains('collapsed')) {
+        // Expand
+        content.classList.remove('collapsed');
+        icon.style.transform = 'rotate(0deg)';
+      } else {
+        // Collapse
+        content.classList.add('collapsed');
+        icon.style.transform = 'rotate(-90deg)';
+      }
+    });
+  });
+
+  // Keep toggle button functionality but stop propagation
+  accordionToggles.forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  });
 }
 
 // ===========================

@@ -111,7 +111,7 @@ if (stored.length === 0) {
   // Display status with duration information
   const durationText = metadata.durationSeconds
     ? ` in ${metadata.durationSeconds} seconds`
-    : '';
+    : "";
   statusText.textContent = `Processed ${stored.length} file${
     stored.length > 1 ? "s" : ""
   }${durationText} successfully`;
@@ -150,7 +150,6 @@ async function fetchFile(path, token) {
   }
 }
 
-
 // ===========================
 // === LOAD SINGLE FILE UI ===
 // ===========================
@@ -160,7 +159,10 @@ async function loadFile(index) {
 
   // Check if item.response exists (might be undefined if there was an error)
   if (!item.response) {
-    showAlert("File data is corrupted or missing. Please process the file again.", "Error");
+    showAlert(
+      "File data is corrupted or missing. Please process the file again.",
+      "Error"
+    );
     return;
   }
 
@@ -252,15 +254,19 @@ async function loadFile(index) {
                     </svg>
                 </button>
             </div>
-            <div class="accordion-content collapsed" data-page="${page.pageNumber}">
+            <div class="accordion-content collapsed" data-page="${
+              page.pageNumber
+            }">
                 <div class="data-row">
                     <span class="data-label">○ Type:</span>
-                    <select class="data-value type-select" ${editable ? "" : "disabled"}>
+                    <select class="data-value type-select" ${
+                      editable ? "" : "disabled"
+                    }>
                         ${DOCUMENT_TYPES.map(
                           (type) =>
                             `<option value="${type}" ${
-                              (page.docType.correction || page.docType.reading) ===
-                              type
+                              (page.docType.correction ||
+                                page.docType.reading) === type
                                 ? "selected"
                                 : ""
                             }>${type}</option>`
@@ -301,42 +307,44 @@ async function loadFile(index) {
 
   document.getElementById(
     "matchSummary"
-  ).textContent = `🔍 ${nikMatch}/${totalPages} pages have NIK matching the main KTP`;
+  ).textContent = `${nikMatch}/${totalPages} pages have NIK matching the main KTP`;
 }
 
 // ===========================
 // === ACCORDION FUNCTIONALITY ===
 // ===========================
 function setupAccordionListeners() {
-  const pageHeaders = document.querySelectorAll('.page-header-wrapper');
-  const accordionToggles = document.querySelectorAll('.accordion-toggle');
+  const pageHeaders = document.querySelectorAll(".page-header-wrapper");
+  const accordionToggles = document.querySelectorAll(".accordion-toggle");
 
   // Add click event to entire page header (not just the toggle button)
   pageHeaders.forEach((header, index) => {
-    header.addEventListener('click', function(e) {
+    header.addEventListener("click", function (e) {
       // Prevent event from firing twice if toggle button was clicked
       e.stopPropagation();
 
-      const pageNumber = this.getAttribute('data-page');
-      const content = document.querySelector(`.accordion-content[data-page="${pageNumber}"]`);
-      const icon = this.querySelector('.accordion-icon');
-      const toggle = this.querySelector('.accordion-toggle');
+      const pageNumber = this.getAttribute("data-page");
+      const content = document.querySelector(
+        `.accordion-content[data-page="${pageNumber}"]`
+      );
+      const icon = this.querySelector(".accordion-icon");
+      const toggle = this.querySelector(".accordion-toggle");
 
-      if (content.classList.contains('collapsed')) {
+      if (content.classList.contains("collapsed")) {
         // Expand
-        content.classList.remove('collapsed');
-        icon.style.transform = 'rotate(0deg)';
+        content.classList.remove("collapsed");
+        icon.style.transform = "rotate(0deg)";
       } else {
         // Collapse
-        content.classList.add('collapsed');
-        icon.style.transform = 'rotate(-90deg)';
+        content.classList.add("collapsed");
+        icon.style.transform = "rotate(-90deg)";
       }
     });
   });
 
   // Keep toggle button functionality but stop propagation
-  accordionToggles.forEach(toggle => {
-    toggle.addEventListener('click', function(e) {
+  accordionToggles.forEach((toggle) => {
+    toggle.addEventListener("click", function (e) {
       e.stopPropagation();
     });
   });
@@ -388,39 +396,36 @@ async function loadHistory(page = 1) {
       return;
     }
 
-    const table = document.createElement("table");
-    table.classList.add("history-table");
-    table.innerHTML = `
-            <thead>
-                <tr>
-                    <th>Filename</th>
-                    <th>Pages</th>
-                    <th>Status</th>
-                    <th>Processed At</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${items
-                  .map(
-                    (item) => `
-                    <tr data-hash="${item.hash}" class="history-row">
-                        <td>${item.filename}</td>
-                        <td>${item.pages}</td>
-                        <td><span class="status ${item.assessment.toLowerCase()}">${
-                      item.assessment
-                    }</span></td>
-                        <td>${new Date(item.processedAt).toLocaleString()}</td>
-                    </tr>
-                `
-                  )
-                  .join("")}
-            </tbody>
-        `;
+    const cardsContainer = document.createElement("div");
+    cardsContainer.classList.add("history-cards");
 
-    // === Make rows clickable ===
-    table.querySelectorAll(".history-row").forEach((row) => {
-      row.addEventListener("click", async () => {
-        const hash = row.getAttribute("data-hash");
+    cardsContainer.innerHTML = items
+      .map(
+        (item) => `
+        <div class="history-card ${item.assessment.toLowerCase()}" data-hash="${
+          item.hash
+        }">
+            <div class="history-card-header">
+                <h3 class="history-card-filename">${item.filename}</h3>
+                <span class="history-card-status ${item.assessment.toLowerCase()}">${
+          item.assessment
+        }</span>
+            </div>
+            <div class="history-card-meta">
+                <div class="history-card-pages">${item.pages} pages</div>
+                <div class="history-card-date">${new Date(
+                  item.processedAt
+                ).toLocaleString()}</div>
+            </div>
+        </div>
+    `
+      )
+      .join("");
+
+    // === Make cards clickable ===
+    cardsContainer.querySelectorAll(".history-card").forEach((card) => {
+      card.addEventListener("click", async () => {
+        const hash = card.getAttribute("data-hash");
         const url = `${apiEndpoint}/api/v1/walacakra/history/${hash}`;
 
         try {
@@ -447,13 +452,17 @@ async function loadHistory(page = 1) {
             files: stored,
             metadata: {
               totalFiles: 1,
-              processedAt: json.metadata.document.processedAt || new Date().toISOString(),
+              processedAt:
+                json.metadata.document.processedAt || new Date().toISOString(),
               duration: 0,
-              durationSeconds: 0
-            }
+              durationSeconds: 0,
+            },
           };
 
-          localStorage.setItem("walacakra_results", JSON.stringify(resultsWithMeta));
+          localStorage.setItem(
+            "walacakra_results",
+            JSON.stringify(resultsWithMeta)
+          );
 
           // Redirect ke halaman result/index.html
           window.location.href = "index.html";
@@ -488,8 +497,10 @@ async function loadHistory(page = 1) {
 
     // Replace content
     historyContainer.innerHTML = "";
-    historyContainer.appendChild(table);
-    historyContainer.appendChild(paginationDiv);
+    historyContainer.appendChild(cardsContainer);
+
+    // Move pagination controls outside the history container
+    document.querySelector(".right-panel").appendChild(paginationDiv);
   } catch (err) {
     console.error("❌ Error loading history:", err);
     historyContainer.innerHTML = `<p class="error">Failed to load history data.</p>`;
@@ -607,7 +618,9 @@ async function loadPDFViewer(fileUrl) {
 // ==========================
 const pdfCanvas = document.getElementById("pdfCanvas");
 const magnifierCanvas = document.getElementById("magnifierCanvas");
-const magnifierCtx = magnifierCanvas.getContext("2d", { willReadFrequently: true });
+const magnifierCtx = magnifierCanvas.getContext("2d", {
+  willReadFrequently: true,
+});
 const zoomFactor = 2.0; // seberapa besar pembesaran
 
 pdfCanvas.addEventListener("mousemove", (e) => {
@@ -718,7 +731,7 @@ async function updateAssessment(type) {
     // update localStorage seluruh stored dengan format baru
     const resultsWithMeta = {
       files: stored,
-      metadata: metadata
+      metadata: metadata,
     };
     localStorage.setItem("walacakra_results", JSON.stringify(resultsWithMeta));
 

@@ -338,7 +338,17 @@ tabs.forEach(tab => {
             document.querySelector(".summary-title").style.display = "block";
             document.getElementById("pageItemContainer").style.display = "block";
             document.querySelector(".info-box").style.display = "block";
-            document.querySelector(".action-buttons").style.display = "flex";
+            // === Update assessment badge ===
+            const assessmentStatus = document.getElementById("assessmentStatus");
+            const assessment = assessmentStatus.innerText.toLowerCase() || "pending";
+
+            // === Hide or show action buttons ===
+            const actionButtons = document.querySelector(".action-buttons");
+            if (["approved", "rejected"].includes(assessment)) {
+                actionButtons.style.display = "none";
+            } else {
+                actionButtons.style.display = "flex";
+            }
             historyContainer.style.display = "none";
         } else if (tabName === "History") {
             // sembunyikan konten analisis

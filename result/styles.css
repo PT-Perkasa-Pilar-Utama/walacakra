@@ -815,101 +815,162 @@ body {
     border-radius: 12px;
     background: #ffffff;
     box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-    overflow-x: auto;
+    transition: all 0.3s ease;
+    height: 55vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.history-card {
+    background: white;
+    border-radius: 8px;
+    padding: 10px 16px;
+    border-left: 3px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.history-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #e5e7eb;
     transition: all 0.3s ease;
 }
 
-.history-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 15px;
-    color: #374151;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #fff;
+.history-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.history-table thead {
-    background: linear-gradient(to right, #e0e7ff, #f3f4f6);
+.history-card.pending {
+    border-left-color: #f59e0b;
 }
 
-.history-table th {
-    text-align: left;
-    padding: 12px 16px;
+.history-card.pending::before {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.history-card.approved {
+    border-left-color: #10b981;
+}
+
+.history-card.approved::before {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.history-card.rejected {
+    border-left-color: #ef4444;
+}
+
+.history-card.rejected::before {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.history-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.history-card-filename {
+    font-size: 14px;
     font-weight: 600;
-    color: #334155;
-    border-bottom: 1px solid #e5e7eb;
-    text-transform: uppercase;
-    font-size: 13px;
-    letter-spacing: 0.4px;
+    color: #1f2937;
+    margin: 0;
+    word-break: break-word;
+    flex: 1;
+    margin-right: 12px;
 }
 
-.history-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    vertical-align: middle;
-}
-
-.history-table tr:last-child td {
-    border-bottom: none;
-}
-
-.history-table tr:hover {
-    background: #f9fafb;
-    transition: background 0.2s ease;
-}
-
-.history-table .status {
+.history-card-status {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    text-align: center;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.8);
 }
 
-.status.pending {
-    color: #b45309;
-    background: #fef3c7;
-    border-radius: 6px;
-    padding: 4px 10px;
-    display: inline-block;
+.history-card-status.pending {
+    color: #92400e;
 }
 
-.status.approved {
+.history-card-status.approved {
     color: #166534;
-    background: #dcfce7;
-    border-radius: 6px;
-    padding: 4px 10px;
-    display: inline-block;
 }
 
-.status.rejected {
+.history-card-status.rejected {
     color: #991b1b;
-    background: #fee2e2;
-    border-radius: 6px;
-    padding: 4px 10px;
-    display: inline-block;
+}
+
+.history-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.history-card-pages {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.history-card-date {
+    font-size: 11px;
+    color: #9ca3af;
 }
 
 .loading, .no-history {
     text-align: center;
-    padding: 20px;
+    padding: 40px 20px;
     color: #64748b;
     font-style: italic;
+    grid-column: 1 / -1;
 }
-
 
 .pagination-controls {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 12px;
-    margin-top: 15px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    flex-shrink: 0;
 }
 
-/* Row clickable look */
-.history-table tbody tr {
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.05s ease;
+/* Animation for cards */
+.history-card {
+    animation: slideInUp 0.4s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* .page-btn {

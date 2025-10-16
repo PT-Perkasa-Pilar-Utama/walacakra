@@ -94,7 +94,9 @@ function showConfirm(message, onConfirm, title = "Confirm Action") {
 // === LOAD RESULT ===
 // ===================
 
-const stored = JSON.parse(localStorage.getItem("walacakra_results")) || [];
+const storedData = JSON.parse(localStorage.getItem("walacakra_results")) || {};
+const stored = storedData.files || [];
+const metadata = storedData.metadata || {};
 const statusText = document.getElementById("statusText");
 const fileOptions = document.getElementById("fileOptions");
 const selectedFile = document.getElementById("selectedFile");
@@ -106,9 +108,13 @@ let currentFileIndex = 0;
 if (stored.length === 0) {
   showAlert("No processed file found. Please process a document first.");
 } else {
+  // Display status with duration information
+  const durationText = metadata.durationSeconds
+    ? ` in ${metadata.durationSeconds} seconds`
+    : '';
   statusText.textContent = `Processed ${stored.length} file${
     stored.length > 1 ? "s" : ""
-  } successfully`;
+  }${durationText} successfully`;
 
   // Populate dropdown options
   fileOptions.innerHTML = "";
@@ -128,7 +134,7 @@ async function fetchFile(path, token) {
 
   try {
     // Pastikan URL lengkap
-    const url = path.startsWith("http") ? path : `${api_endpoint}${path}`;
+    const url = path.startsWith("http") ? path : `${apiEndpoint}${path}`;
 
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -377,7 +383,17 @@ async function loadHistory(page = 1) {
             },
           ];
 
-          localStorage.setItem("walacakra_results", JSON.stringify(stored));
+          const resultsWithMeta = {
+            files: stored,
+            metadata: {
+              totalFiles: 1,
+              processedAt: json.metadata.document.processedAt || new Date().toISOString(),
+              duration: 0,
+              durationSeconds: 0
+            }
+          };
+
+          localStorage.setItem("walacakra_results", JSON.stringify(resultsWithMeta));
 
           // Redirect ke halaman result/index.html
           window.location.href = "index.html";
@@ -639,8 +655,12 @@ async function updateAssessment(type) {
     // simpan ke array global stored (bukan cuma 1 item)
     stored[currentFileIndex] = current;
 
-    // update localStorage seluruh stored
-    localStorage.setItem("walacakra_results", JSON.stringify(stored));
+    // update localStorage seluruh stored dengan format baru
+    const resultsWithMeta = {
+      files: stored,
+      metadata: metadata
+    };
+    localStorage.setItem("walacakra_results", JSON.stringify(resultsWithMeta));
 
     // refresh tampilan
     await loadFile(currentFileIndex);

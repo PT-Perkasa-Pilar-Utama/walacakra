@@ -231,10 +231,11 @@ async function simulateProcessing() {
     `;
   stepsContainer.appendChild(stepDiv);
 
+  let completedFiles = 0;
   const results = []; // tempat nyimpen hasil tiap file
 
-  // Kirim semua file ke API
-  const promises = files.map(async (file, index) => {
+  // Kirim semua file ke API secara paralel dengan Promise.all
+  const promises = files.map(async (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -255,25 +256,36 @@ async function simulateProcessing() {
       console.log(`✅ Processed: ${file.name}`, result);
 
       // Simpan ke array hasil
-      results.push({
+      const fileResult = {
         filename: file.name,
         response: result,
-      });
+      };
+
+      // Update progress setiap kali file selesai
+      completedFiles++;
+      document.getElementById("processing-status").textContent =
+        `Processing ${completedFiles}/${totalFiles} files...`;
+
+      return fileResult;
     } catch (error) {
       console.error(`❌ Failed: ${file.name}`, error);
-      results.push({
+      const fileResult = {
         filename: file.name,
         error: error.message,
-      });
-    }
+      };
 
-    // Update tampilan progress
-    document.getElementById("processing-status").textContent = `Processing ${
-      index + 1
-    }/${totalFiles} files...`;
+      // Update progress setiap kali file selesai (meskipun error)
+      completedFiles++;
+      document.getElementById("processing-status").textContent =
+        `Processing ${completedFiles}/${totalFiles} files...`;
+
+      return fileResult;
+    }
   });
 
-  await Promise.all(promises);
+  // Tunggu semua file selesai diproses
+  const processedResults = await Promise.all(promises);
+  results.push(...processedResults);
 
   // Setelah await Promise.all(promises);
   const overlay = document.getElementById("processingOverlay");
@@ -298,8 +310,22 @@ async function simulateProcessing() {
     stepsContainer_overlay.appendChild(div);
   });
 
+  // Hitung total durasi
+  const endTime = Date.now();
+  const totalDuration = endTime - startTime;
+  const durationSeconds = (totalDuration / 1000).toFixed(1);
+
   // Simpan semua hasil ke localStorage biar bisa diakses dari result/index.html
-  localStorage.setItem("walacakra_results", JSON.stringify(results));
+  const resultsWithMeta = {
+    files: results,
+    metadata: {
+      totalFiles,
+      processedAt: new Date().toISOString(),
+      duration: totalDuration,
+      durationSeconds: parseFloat(durationSeconds)
+    }
+  };
+  localStorage.setItem("walacakra_results", JSON.stringify(resultsWithMeta));
 
   // Ubah tampilan jadi sukses
   stepDiv.classList.remove("active");

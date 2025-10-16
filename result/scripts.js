@@ -14,6 +14,80 @@ const DOCUMENT_TYPES = [  "",
   "SURAT BERHARGA",
   "UNCLASSIFIED",];
 
+// =========================
+// === MODAL FUNCTIONS ===
+// =========================
+function showModal(title, message, type = 'alert', onConfirm = null) {
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalFooter = document.getElementById('modalFooter');
+    const modalClose = document.getElementById('modalClose');
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+
+    // Clear existing buttons
+    modalFooter.innerHTML = '';
+
+    if (type === 'confirm') {
+        // Add Cancel button
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-secondary';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.onclick = () => {
+            modalOverlay.classList.remove('show');
+            if (onConfirm) onConfirm(false);
+        };
+        modalFooter.appendChild(cancelBtn);
+
+        // Add Confirm button
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'btn btn-primary';
+        confirmBtn.textContent = 'Confirm';
+        confirmBtn.onclick = () => {
+            modalOverlay.classList.remove('show');
+            if (onConfirm) onConfirm(true);
+        };
+        modalFooter.appendChild(confirmBtn);
+    } else {
+        // Add OK button for alerts
+        const okBtn = document.createElement('button');
+        okBtn.className = 'btn btn-primary';
+        okBtn.textContent = 'OK';
+        okBtn.onclick = () => {
+            modalOverlay.classList.remove('show');
+        };
+        modalFooter.appendChild(okBtn);
+    }
+
+    // Close button functionality
+    modalClose.onclick = () => {
+        modalOverlay.classList.remove('show');
+        if (type === 'confirm' && onConfirm) onConfirm(false);
+    };
+
+    // Close on overlay click
+    modalOverlay.onclick = (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.classList.remove('show');
+            if (type === 'confirm' && onConfirm) onConfirm(false);
+        }
+    };
+
+    // Show modal
+    modalOverlay.classList.add('show');
+}
+
+// Helper functions to replace alert() and confirm()
+function showAlert(message, title = 'Information') {
+    showModal(title, message, 'alert');
+}
+
+function showConfirm(message, onConfirm, title = 'Confirm Action') {
+    showModal(title, message, 'confirm', onConfirm);
+}
+
 // ===================
 // === LOAD RESULT ===
 // ===================
@@ -28,7 +102,7 @@ const bearerToken = localStorage.getItem("apiToken")
 let currentFileIndex = 0;
 
 if (stored.length === 0) {
-    alert("No processed file found. Please process a document first.");
+    showAlert("No processed file found. Please process a document first.");
 } else {
     statusText.textContent = `Processed ${stored.length} file${stored.length > 1 ? "s" : ""} successfully`;
 
@@ -284,7 +358,7 @@ async function loadHistory(page = 1) {
 
                 } catch (err) {
                     console.error("❌ Error loading history detail:", err);
-                    alert("Failed to load this document’s detail.");
+                    showAlert("Failed to load this document's detail.", "Error");
                 }
             });
         });
@@ -484,7 +558,7 @@ pdfCanvas.addEventListener("mouseleave", () => {
 async function updateAssessment(type) {
   const current = stored[currentFileIndex];
   const hash = current?.response?.metadata?.document?.hash;
-  if (!hash) return alert("⚠️ Hash tidak ditemukan.");
+  if (!hash) return showAlert("⚠️ Hash tidak ditemukan.", "Warning");
 
   const url = `${apiEndpoint}/api/v1/walacakra/process/${hash}`;
 
@@ -529,7 +603,7 @@ async function updateAssessment(type) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
 
-    alert(`✅ ${type} success!`);
+    showAlert(`✅ ${type} success!`, "Success");
 
     // === Update state lokal ===
     current.response.data = json.data; // update hasil baru
@@ -545,25 +619,31 @@ async function updateAssessment(type) {
     await loadFile(currentFileIndex);
   } catch (err) {
     console.error("❌ Error:", err);
-    alert(`Failed to ${type.toLowerCase()} document.`);
+    showAlert(`Failed to ${type.toLowerCase()} document.`, "Error");
   }
 }
 
 // === Tombol aksi ===
 document.querySelector(".btn-reject")?.addEventListener("click", async () => {
-  if (confirm("Are you sure you want to reject this document?")) {
-    await updateAssessment("REJECTED");
-  }
+  showConfirm("Are you sure you want to reject this document?", async (confirmed) => {
+    if (confirmed) {
+      await updateAssessment("REJECTED");
+    }
+  }, "Reject Document");
 });
 
 document.querySelector(".btn-approve")?.addEventListener("click", async () => {
-  if (confirm("Are you sure you want to approve this document?")) {
-    await updateAssessment("APPROVED");
-  }
+  showConfirm("Are you sure you want to approve this document?", async (confirmed) => {
+    if (confirmed) {
+      await updateAssessment("APPROVED");
+    }
+  }, "Approve Document");
 });
 
 document.querySelector(".btn-recalculate")?.addEventListener("click", async () => {
-  if (confirm("Recalculate document analysis with corrected fields?")) {
-    await updateAssessment("PENDING");
-  }
+  showConfirm("Recalculate document analysis with corrected fields?", async (confirmed) => {
+    if (confirmed) {
+      await updateAssessment("PENDING");
+    }
+  }, "Recalculate Document");
 });

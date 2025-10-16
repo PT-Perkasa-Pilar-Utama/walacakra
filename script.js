@@ -8,6 +8,80 @@ const processingContent = document.getElementById('processingContent');
 const successContent = document.getElementById('successContent');
 
 // =========================
+// === MODAL FUNCTIONS ===
+// =========================
+function showModal(title, message, type = 'alert', onConfirm = null) {
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalFooter = document.getElementById('modalFooter');
+    const modalClose = document.getElementById('modalClose');
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+
+    // Clear existing buttons
+    modalFooter.innerHTML = '';
+
+    if (type === 'confirm') {
+        // Add Cancel button
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-secondary';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.onclick = () => {
+            modalOverlay.classList.remove('show');
+            if (onConfirm) onConfirm(false);
+        };
+        modalFooter.appendChild(cancelBtn);
+
+        // Add Confirm button
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'btn btn-primary';
+        confirmBtn.textContent = 'Confirm';
+        confirmBtn.onclick = () => {
+            modalOverlay.classList.remove('show');
+            if (onConfirm) onConfirm(true);
+        };
+        modalFooter.appendChild(confirmBtn);
+    } else {
+        // Add OK button for alerts
+        const okBtn = document.createElement('button');
+        okBtn.className = 'btn btn-primary';
+        okBtn.textContent = 'OK';
+        okBtn.onclick = () => {
+            modalOverlay.classList.remove('show');
+        };
+        modalFooter.appendChild(okBtn);
+    }
+
+    // Close button functionality
+    modalClose.onclick = () => {
+        modalOverlay.classList.remove('show');
+        if (type === 'confirm' && onConfirm) onConfirm(false);
+    };
+
+    // Close on overlay click
+    modalOverlay.onclick = (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.classList.remove('show');
+            if (type === 'confirm' && onConfirm) onConfirm(false);
+        }
+    };
+
+    // Show modal
+    modalOverlay.classList.add('show');
+}
+
+// Helper functions to replace alert() and confirm()
+function showAlert(message, title = 'Information') {
+    showModal(title, message, 'alert');
+}
+
+function showConfirm(message, onConfirm, title = 'Confirm Action') {
+    showModal(title, message, 'confirm', onConfirm);
+}
+
+// =========================
 // 🔹 Toggle API Config Panel
 // =========================
 const apiHeader = document.getElementById('apiHeader');
@@ -104,7 +178,7 @@ function handleFiles(files) {
 
 startBtn.addEventListener('click', () => {
     const files = Array.from(fileInput.files);
-    if (files.length === 0) return alert("Please upload a file first!");
+    if (files.length === 0) return showAlert("Please upload a file first!", "Warning");
 
     // Buat overlay baru dinamis
     createProcessingOverlay(files[0].name);
@@ -130,7 +204,7 @@ async function simulateProcessing() {
 
     
     if (totalFiles === 0) {
-        alert("Please upload at least one file before starting the process.");
+        showAlert("Please upload at least one file before starting the process.", "Warning");
         return;
     }
 

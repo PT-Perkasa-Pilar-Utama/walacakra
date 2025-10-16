@@ -157,6 +157,13 @@ async function fetchFile(path, token) {
 async function loadFile(index) {
   currentFileIndex = index; // simpan file yang sedang aktif
   const item = stored[index];
+
+  // Check if item.response exists (might be undefined if there was an error)
+  if (!item.response) {
+    showAlert("File data is corrupted or missing. Please process the file again.", "Error");
+    return;
+  }
+
   const data = item.response.data;
   const meta = item.response.metadata;
 
@@ -165,6 +172,10 @@ async function loadFile(index) {
   // === Update assessment badge ===
   const assessmentStatus = document.getElementById("assessmentStatus");
   const assessment = data.assessment?.toLowerCase() || "pending";
+  let editable = false;
+  if (assessment == "pending") {
+    editable = true;
+  }
 
   assessmentStatus.textContent = assessment.toUpperCase();
   assessmentStatus.className = `assessment-status ${assessment}`;
@@ -196,9 +207,9 @@ async function loadFile(index) {
   // === Update name & NIK fields langsung dari stored data ===
   const firstPage = data.pages?.[0] || {};
   document.getElementById("fieldName").textContent =
-    firstPage.name?.reading || "-";
+    firstPage.name?.correction || firstPage.name?.reading || "-";
   document.getElementById("fieldNIK").textContent =
-    firstPage.nik?.reading || "-";
+    firstPage.nik?.correction || firstPage.nik?.reading || "-";
 
   // === Summary pages ===
   pageItemContainer.innerHTML = "";
@@ -244,7 +255,7 @@ async function loadFile(index) {
             <div class="accordion-content collapsed" data-page="${page.pageNumber}">
                 <div class="data-row">
                     <span class="data-label">○ Type:</span>
-                    <select class="data-value type-select">
+                    <select class="data-value type-select" ${editable ? "" : "disabled"}>
                         ${DOCUMENT_TYPES.map(
                           (type) =>
                             `<option value="${type}" ${
@@ -258,7 +269,7 @@ async function loadFile(index) {
                 </div>
                 <div class="data-row">
                     <span class="data-label">○ NIK:</span>
-                    <span class="data-value nik-field" contenteditable="true" style="background:white;">
+                    <span class="data-value nik-field" contenteditable="${editable}" style="background:white;">
                         ${page.nik.correction || page.nik.reading || "-"}
                     </span>
                 </div>
@@ -546,7 +557,7 @@ async function loadPDFViewer(fileUrl) {
   // setup state
   let currentPage = 1;
   const canvas = document.getElementById("pdfCanvas");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
   const pageInfo = document.getElementById("pageInfo");
 
   async function renderPage(num) {
@@ -596,7 +607,7 @@ async function loadPDFViewer(fileUrl) {
 // ==========================
 const pdfCanvas = document.getElementById("pdfCanvas");
 const magnifierCanvas = document.getElementById("magnifierCanvas");
-const magnifierCtx = magnifierCanvas.getContext("2d");
+const magnifierCtx = magnifierCanvas.getContext("2d", { willReadFrequently: true });
 const zoomFactor = 2.0; // seberapa besar pembesaran
 
 pdfCanvas.addEventListener("mousemove", (e) => {

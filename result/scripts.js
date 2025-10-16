@@ -1,7 +1,18 @@
 // =========================
 // === CONFIGURABLE LIST ===
 // =========================
-const DOCUMENT_TYPES = ["KTP", "KK", "Sertificate", "Unclassified"];
+const DOCUMENT_TYPES = [  "",
+  "KTP",
+  "KK",
+  "SHM",
+  "SHGB",
+  "BPKB",
+  "STNK",
+  "FAKTUR KENDARAAN",
+  "SERTIFIKAT DEPOSITO",
+  "SPK",
+  "SURAT BERHARGA",
+  "UNCLASSIFIED",];
 
 // ===================
 // === LOAD RESULT ===
@@ -14,6 +25,7 @@ const selectedFile = document.getElementById("selectedFile");
 const pageItemContainer = document.getElementById("pageItemContainer");
 const apiEndpoint = localStorage.getItem("apiEndpoint")
 const bearerToken = localStorage.getItem("apiToken")
+let currentFileIndex = 0;
 
 if (stored.length === 0) {
     alert("No processed file found. Please process a document first.");
@@ -34,14 +46,14 @@ if (stored.length === 0) {
 }
 
 
-async function fetchStorageFile(path, token) {
+async function fetchFile(path, token) {
     if (!path) return "";
 
     try {
         // Pastikan URL lengkap
         const url = path.startsWith("http")
             ? path
-            : `${api_endpoint}/storage/${path}`;
+            : `${api_endpoint}${path}`;
 
         const headers = token
             ? { Authorization: `Bearer ${token}` }
@@ -62,9 +74,10 @@ async function fetchStorageFile(path, token) {
 // === LOAD SINGLE FILE UI ===
 // ===========================
 async function loadFile(index) {
+    currentFileIndex = index; // simpan file yang sedang aktif
     const item = stored[index];
-    const data = item.response?.data;
-    const meta = item.response?.metadata;
+    const data = item.response.data;
+    const meta = item.response.metadata;
 
     selectedFile.textContent = item.filename;
 
@@ -77,22 +90,20 @@ async function loadFile(index) {
 
     // === Hide or show action buttons ===
     const actionButtons = document.querySelector(".action-buttons");
-
     if (["approved", "rejected"].includes(assessment)) {
         actionButtons.style.display = "none";
     } else {
         actionButtons.style.display = "flex";
     }
 
-    const photoUrl = await fetchStorageFile(data.photo, bearerToken);
-    console.log(photoUrl)
+    // === Update profile photo ===
+    const photoUrl = await fetchFile(meta.document.photo, bearerToken);
     document.getElementById("profileImage").src = photoUrl || "../assets/default-avatar.png";
 
     // === PDF preview ===
     try {
         if (meta?.document?.url) {
             await loadPDFViewer(meta.document.url);
-            // await loadPDFViewer("./test.pdf");
         } else {
             console.warn("No PDF URL found in metadata");
         }
@@ -100,49 +111,81 @@ async function loadFile(index) {
         console.error("❌ Error loading PDF preview:", err);
     }
 
-    // Name & NIK
-    // need to change this shit to canvas
-    const firstPage = data.pages[0]; // ✅ tambahkan ini
+    // === Update name & NIK fields langsung dari stored data ===
+    const firstPage = data.pages?.[0] || {};
     document.getElementById("fieldName").textContent = firstPage.name?.reading || "-";
     document.getElementById("fieldNIK").textContent = firstPage.nik?.reading || "-";
-    document.getElementById("nikReading").textContent = firstPage.nik?.reading || "-";
 
-    // Summary pages
+    // === Summary pages ===
     pageItemContainer.innerHTML = "";
     data.pages.forEach((page) => {
         const pageItem = document.createElement("div");
         pageItem.classList.add("page-item");
 
-        const matchStatus = page.docType.isMatched ? "match" : (page.docType.isCorrected ? "warning" : "error");
-        const matchText = page.docType.isMatched
-            ? "match"
-            : page.docType.isCorrected
-            ? "exist, but not match"
-            : "not exist";
+        // === Tentukan status match ===
+        let matchStatus, matchText;
+        if ((page.nik.correction || page.nik.reading) === ( firstPage.nik.correction ||firstPage.nik.reading)) {
+            matchText = "match";
+            matchStatus = "match";
+        } else if ((page.nik.correction || page.nik.reading) && page.nik.reading.trim() !== "") {
+            matchText = "exist, but not match";
+            matchStatus = "warning";
+        } else {
+            matchText = "not exist";
+            matchStatus = "error";
+        }
 
-            pageItem.innerHTML = `
-                <div class="page-header">• Page ${page.pageNumber}</div>
-                <div class="data-row">
-                    <span class="data-label">○ Type:</span>
-                    <select class="data-value type-select">
-                        ${DOCUMENT_TYPES.map(
-                            type => `<option value="${type}" ${
-                                (page.docType.correction || page.docType.reading) === type ? "selected" : ""
-                            }>${type}</option>`
-                        ).join("")}
-                    </select>
+        // === Buat markup awal ===
+        let innerHTML = `
+            <div class="page-header">• Page ${page.pageNumber + 1}</div>
+            <div class="data-row">
+                <span class="data-label">○ Type:</span>
+                <select class="data-value type-select">
+                    ${DOCUMENT_TYPES.map(
+                        type => `<option value="${type}" ${
+                            (page.docType.correction || page.docType.reading) === type ? "selected" : ""
+                        }>${type}</option>`
+                    ).join("")}
+                </select>
+            </div>
+        `;
+
+        // === Tambahkan kolom NIK (selalu tampil) ===
+        innerHTML += `
+            <div class="data-row">
+                <span class="data-label">○ NIK:</span>
+                <span class="data-value nik-field" contenteditable="true" style="background:white;">
+                    ${page.nik.correction || page.nik.reading || "-"}
+                </span>
+                <div class="status-indicator">
+                    <span class="status-icon ${matchStatus}"></span>
+                    <span class="status-text">${matchText}</span>
                 </div>
-                <div class="data-row">
-                    <span class="data-label">○ NIK:</span>
-                    <span class="data-value">${page.nik.reading || "-"}</span>
-                    <div class="status-indicator">
-                        <span class="status-icon ${matchStatus}"></span>
-                        <span class="status-text">${matchText}</span>
-                    </div>
-                </div>
-            `;
+            </div>
+        `;
+
+        pageItem.innerHTML = innerHTML;
         pageItemContainer.appendChild(pageItem);
     });
+
+    // === Hitung summary match berdasarkan rule ===
+    const ktpPage = data.pages.find(p => p.docType.reading === "KTP");
+    const ktpNik = ktpPage?.nik?.reading || "";
+
+    let totalPages = data.pages.length;
+    let nikAvailable = 0;
+    let nikMatch = 0;
+
+    data.pages.forEach(p => {
+        const nik = p.nik?.reading || "";
+        if (nik.trim()) {
+            nikAvailable++;
+            if (nik === ktpNik) nikMatch++;
+        }
+    });
+
+    document.getElementById("matchSummary").textContent =
+        `🔍 ${nikMatch}/${totalPages} pages have NIK matching the main KTP`;
 }
 
 // ===========================
@@ -295,6 +338,7 @@ tabs.forEach(tab => {
             // sembunyikan konten analisis
             document.querySelector(".summary-title").style.display = "none";
             document.getElementById("pageItemContainer").style.display = "none";
+            document.getElementById("matchSummary").style.display = "none";
             document.querySelector(".info-box").style.display = "none";
             document.querySelector(".action-buttons").style.display = "none";
             historyContainer.style.display = "block";
@@ -437,16 +481,89 @@ pdfCanvas.addEventListener("mouseleave", () => {
 // ===========================
 // === BUTTON ACTIONS ========
 // ===========================
-document.querySelector('.btn-reject').addEventListener('click', () => {
-    if (confirm('Are you sure you want to reject this document?')) {
-        alert('Document rejected');
-    }
+async function updateAssessment(type) {
+  const current = stored[currentFileIndex];
+  const hash = current?.response?.metadata?.document?.hash;
+  if (!hash) return alert("⚠️ Hash tidak ditemukan.");
+
+  const url = `${apiEndpoint}/api/v1/walacakra/process/${hash}`;
+
+  // === Kumpulkan update field (kalau recalculate) ===
+  let updates = [];
+  if (type === "PENDING") {
+    document.querySelectorAll(".page-item").forEach((item, i) => {
+      const pageNumber = i + 1;
+      const docType = item.querySelector(".type-select")?.value?.trim();
+      const nik = item.querySelector(".nik-field")?.textContent.trim();
+      const name = item.querySelector(".name-field")?.textContent.trim();
+
+      const updateObj = { pageNumber };
+
+      if (docType) updateObj.docType = { correction: docType };
+      if (nik) updateObj.nik = { correction: nik };
+      if (name) updateObj.name = { correction: name };
+
+      // hanya push jika ada perubahan berarti
+      if (Object.keys(updateObj).length > 1) updates.push(updateObj);
+    });
+  }
+
+  // === Buat payload berdasarkan tipe ===
+  const payload =
+    type === "APPROVED"
+      ? { assessment: "APPROVED", updates: [] }
+      : type === "REJECTED"
+      ? { assessment: "REJECTED", updates: [] }
+      : { assessment: "PENDING", updates };
+
+  try {
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${bearerToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    alert(`✅ ${type} success!`);
+
+    // === Update state lokal ===
+    current.response.data = json.data; // update hasil baru
+    current.response.data.assessment = payload.assessment; // pastikan assessment sinkron
+
+    // simpan ke array global stored (bukan cuma 1 item)
+    stored[currentFileIndex] = current;
+
+    // update localStorage seluruh stored
+    localStorage.setItem("walacakra_results", JSON.stringify(stored));
+
+    // refresh tampilan
+    await loadFile(currentFileIndex);
+  } catch (err) {
+    console.error("❌ Error:", err);
+    alert(`Failed to ${type.toLowerCase()} document.`);
+  }
+}
+
+// === Tombol aksi ===
+document.querySelector(".btn-reject")?.addEventListener("click", async () => {
+  if (confirm("Are you sure you want to reject this document?")) {
+    await updateAssessment("REJECTED");
+  }
 });
-document.querySelector('.btn-approve').addEventListener('click', () => {
-    if (confirm('Are you sure you want to approve this document?')) {
-        alert('Document approved');
-    }
+
+document.querySelector(".btn-approve")?.addEventListener("click", async () => {
+  if (confirm("Are you sure you want to approve this document?")) {
+    await updateAssessment("APPROVED");
+  }
 });
-document.querySelector('.btn-recalculate').addEventListener('click', () => {
-    alert('Recalculating document analysis...');
+
+document.querySelector(".btn-recalculate")?.addEventListener("click", async () => {
+  if (confirm("Recalculate document analysis with corrected fields?")) {
+    await updateAssessment("PENDING");
+  }
 });

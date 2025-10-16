@@ -497,6 +497,7 @@ body {
     height: 78vh;
     display: flex;
     flex-direction: column;
+    gap: 10px;
     /* justify-content: space-evenly; */
 }
 
@@ -770,7 +771,7 @@ body {
     display: inline-block;
 }
 
-.loading, .no-history, .error {
+.loading, .no-history {
     text-align: center;
     padding: 20px;
     color: #64748b;
@@ -884,6 +885,10 @@ body {
 .preview-container {
   position: relative; /* penting! supaya posisi absolute anaknya relatif ke sini */
 }
+
+/* .match-summary {
+    margin-bottom: 10px;
+} */
 
 #magnifierCanvas {
   position: absolute;

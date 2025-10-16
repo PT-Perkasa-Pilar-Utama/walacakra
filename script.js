@@ -230,10 +230,7 @@ function showSuccess(startTime) {
     processingContent.style.display = 'none';
     successContent.style.display = 'block';
     successTime.textContent = `Done in ${durationSec} s`;
-
-    setTimeout(() => {
-        window.location.href = './result/result.html';
-    }, 2000);
+    window.location.href = './result/result.html';
 }
 
 

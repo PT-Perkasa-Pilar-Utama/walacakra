@@ -47,11 +47,11 @@
                         
                         <div class="field-group">
                             <div class="field-label">Name:</div>
-                            <div class="field-value" id="fieldName" contenteditable="true">-</div>
+                            <div class="field-value" id="fieldName">-</div>
                         </div>
                         <div class="field-group">
                             <div class="field-label">NIK:</div>
-                            <div class="field-value" id="fieldNIK" contenteditable="true">-</div>
+                            <div class="field-value" id="fieldNIK">-</div>
                         </div>
                     </div>
 
@@ -71,18 +71,14 @@
                             <span class="page-info" id="pageInfo">1 / 1</span>
                             <button class="page-btn">▶</button>
                         </div>
-                        <div class="nik-reading">
-                            <div class="nik-label">NIK Reading:</div>
-                            <div class="nik-value" id="nikReading" contenteditable="true">-</div>
-                        </div>
                     </div>
                 </div>
 
                 <div class="right-panel">
                     <h2 class="summary-title">Summary:</h2>
+                    <div class="match-summary" id="matchSummary"></div>
                     
                     <div class="page-item-container" id="pageItemContainer"></div>
-
                     <div class="info-box">
                         <p>You can inspect and edit the field for correction per document for any potential mismatch of the real data, and then perform recalculation (for this file only).</p>
                         <p>The correction will be use for further training and model improvement.</p>

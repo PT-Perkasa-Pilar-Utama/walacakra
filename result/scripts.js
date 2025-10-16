@@ -84,6 +84,12 @@ async function loadFile(index) {
     // === Update assessment badge ===
     const assessmentStatus = document.getElementById("assessmentStatus");
     const assessment = data.assessment?.toLowerCase() || "pending";
+    let editable = false
+    if (assessment == "pending") {
+        editable = true
+    }
+
+    console.log(editable)
 
     assessmentStatus.textContent = assessment.toUpperCase();
     assessmentStatus.className = `assessment-status ${assessment}`;
@@ -113,8 +119,8 @@ async function loadFile(index) {
 
     // === Update name & NIK fields langsung dari stored data ===
     const firstPage = data.pages?.[0] || {};
-    document.getElementById("fieldName").textContent = firstPage.name?.reading || "-";
-    document.getElementById("fieldNIK").textContent = firstPage.nik?.reading || "-";
+    document.getElementById("fieldName").textContent = firstPage.name.correction || firstPage.name.reading || "-";
+    document.getElementById("fieldNIK").textContent = firstPage.nik.correction || firstPage.nik.reading || "-";
 
     // === Summary pages ===
     pageItemContainer.innerHTML = "";
@@ -140,7 +146,7 @@ async function loadFile(index) {
             <div class="page-header">• Page ${page.pageNumber + 1}</div>
             <div class="data-row">
                 <span class="data-label">○ Type:</span>
-                <select class="data-value type-select">
+                <select class="data-value type-select" ${editable ? "" : "disabled"}>
                     ${DOCUMENT_TYPES.map(
                         type => `<option value="${type}" ${
                             (page.docType.correction || page.docType.reading) === type ? "selected" : ""
@@ -154,13 +160,13 @@ async function loadFile(index) {
         innerHTML += `
             <div class="data-row">
                 <span class="data-label">○ NIK:</span>
-                <span class="data-value nik-field" contenteditable="true" style="background:white;">
+                <span class="data-value nik-field" contenteditable="${editable}" style="background:white;">
                     ${page.nik.correction || page.nik.reading || "-"}
                 </span>
                 <div class="status-indicator">
                     <span class="status-icon ${matchStatus}"></span>
                     <span class="status-text">${matchText}</span>
-                </div>
+                </div>  
             </div>
         `;
 

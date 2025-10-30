@@ -242,7 +242,7 @@ async function loadFile(index) {
     let innerHTML = `
             <div class="page-header-wrapper" data-page="${page.pageNumber}">
                 <div class="page-header">
-                    • Page ${page.pageNumber + 1}
+                    • Page ${page.pageNumber}
                     <div class="status-indicator">
                         <span class="status-icon ${matchStatus}"></span>
                         <span class="status-text">${matchText}</span>
@@ -298,7 +298,8 @@ async function loadFile(index) {
   let nikMatch = 0;
 
   data.pages.forEach((p) => {
-    const nik = p.nik?.reading || "";
+    const nik = p.nik.correction || p.nik?.reading || "";
+    console.log(nik)
     if (nik.trim()) {
       nikAvailable++;
       if (nik === ktpNik) nikMatch++;
@@ -499,6 +500,9 @@ async function loadHistory(page = 1) {
     historyContainer.innerHTML = "";
     historyContainer.appendChild(cardsContainer);
 
+    const oldPagination = document.querySelector(".pagination-controls");
+    if (oldPagination) oldPagination.remove();
+
     // Move pagination controls outside the history container
     document.querySelector(".right-panel").appendChild(paginationDiv);
   } catch (err) {
@@ -525,6 +529,8 @@ tabs.forEach((tab) => {
       document.querySelector(".info-box").style.display = "block";
       document.querySelector(".action-buttons").style.display = "flex";
       historyContainer.style.display = "none";
+      const oldPagination = document.querySelector(".pagination-controls");
+      if (oldPagination) oldPagination.remove();
     } else if (tabName === "History") {
       // sembunyikan konten analisis
       document.querySelector(".summary-title").style.display = "none";
@@ -695,8 +701,11 @@ async function updateAssessment(type) {
 
       // hanya push jika ada perubahan berarti
       if (Object.keys(updateObj).length > 1) updates.push(updateObj);
+      
     });
   }
+
+  console.log("updates:",updates)
 
   // === Buat payload berdasarkan tipe ===
   const payload =
@@ -707,6 +716,8 @@ async function updateAssessment(type) {
       : { assessment: "PENDING", updates };
 
   try {
+    console.log("patch with payload:", payload)
+
     const res = await fetch(url, {
       method: "PATCH",
       headers: {
@@ -724,7 +735,8 @@ async function updateAssessment(type) {
     // === Update state lokal ===
     current.response.data = json.data; // update hasil baru
     current.response.data.assessment = payload.assessment; // pastikan assessment sinkron
-
+    console.log("updated data:" ,current.response.data)
+    console.log("updated assesment:" ,current.response.data.assessment)
     // simpan ke array global stored (bukan cuma 1 item)
     stored[currentFileIndex] = current;
 
@@ -735,8 +747,17 @@ async function updateAssessment(type) {
     };
     localStorage.setItem("walacakra_results", JSON.stringify(resultsWithMeta));
 
+    console.log("load file after button hitted")
     // refresh tampilan
     await loadFile(currentFileIndex);
+    const newStatus = current.response.data.assessment?.toLowerCase();
+    const actionButtons = document.querySelector(".action-buttons");
+    if (["approved", "rejected"].includes(newStatus)) {
+      actionButtons.style.display = "none";
+    } else {
+      actionButtons.style.display = "flex";
+    }
+
   } catch (err) {
     console.error("❌ Error:", err);
     showAlert(`Failed to ${type.toLowerCase()} document.`, "Error");

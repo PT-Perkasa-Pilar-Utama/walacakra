@@ -209,9 +209,9 @@ async function loadFile(index) {
   // === Update name & NIK fields langsung dari stored data ===
   const firstPage = data.pages?.[0] || {};
   document.getElementById("fieldName").textContent =
-    firstPage.name?.correction || firstPage.name?.reading || "-";
+    firstPage.name?.correction || firstPage.name?.reading || "";
   document.getElementById("fieldNIK").textContent =
-    firstPage.nik?.correction || firstPage.nik?.reading || "-";
+    firstPage.nik?.correction || firstPage.nik?.reading || "";
 
   // === Summary pages ===
   pageItemContainer.innerHTML = "";
@@ -242,7 +242,7 @@ async function loadFile(index) {
     let innerHTML = `
             <div class="page-header-wrapper" data-page="${page.pageNumber}">
                 <div class="page-header">
-                    • Page ${page.pageNumber + 1}
+                    • Page ${page.pageNumber}
                     <div class="status-indicator">
                         <span class="status-icon ${matchStatus}"></span>
                         <span class="status-text">${matchText}</span>
@@ -276,7 +276,7 @@ async function loadFile(index) {
                 <div class="data-row">
                     <span class="data-label">○ NIK:</span>
                     <span class="data-value nik-field" contenteditable="${editable}" style="background:white;">
-                        ${page.nik.correction || page.nik.reading || "-"}
+                        ${page.nik.correction || page.nik.reading || ""}
                     </span>
                 </div>
             </div>
@@ -293,21 +293,20 @@ async function loadFile(index) {
   const ktpPage = data.pages.find((p) => p.docType.reading === "KTP");
   const ktpNik = ktpPage?.nik?.reading || "";
 
-  let totalPages = data.pages.length;
   let nikAvailable = 0;
   let nikMatch = 0;
 
   data.pages.forEach((p) => {
-    const nik = p.nik?.reading || "";
+    const nik = p.nik?.correction || p.nik?.reading || "";
     if (nik.trim()) {
       nikAvailable++;
-      if (nik === ktpNik) nikMatch++;
+      if (p.nik.isMatched || nik == ktpNik) nikMatch++;
     }
   });
 
   document.getElementById(
     "matchSummary"
-  ).textContent = `${nikMatch}/${totalPages} pages have NIK matching the main KTP`;
+  ).textContent = `${nikMatch}/${nikAvailable} NIK have been detected and matched.`;
 }
 
 // ===========================
@@ -682,7 +681,7 @@ async function updateAssessment(type) {
   let updates = [];
   if (type === "PENDING") {
     document.querySelectorAll(".page-item").forEach((item, i) => {
-      const pageNumber = i + 1;
+      const pageNumber = i;
       const docType = item.querySelector(".type-select")?.value?.trim();
       const nik = item.querySelector(".nik-field")?.textContent.trim();
       const name = item.querySelector(".name-field")?.textContent.trim();

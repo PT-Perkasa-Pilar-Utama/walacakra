@@ -242,7 +242,7 @@ async function loadFile(index) {
     let innerHTML = `
             <div class="page-header-wrapper" data-page="${page.pageNumber}">
                 <div class="page-header">
-                    • Page ${page.pageNumber}
+                    • Page ${page.pageNumber + 1}
                     <div class="status-indicator">
                         <span class="status-icon ${matchStatus}"></span>
                         <span class="status-text">${matchText}</span>
@@ -525,7 +525,18 @@ tabs.forEach((tab) => {
       document.querySelector(".summary-title").style.display = "block";
       document.getElementById("pageItemContainer").style.display = "block";
       document.querySelector(".info-box").style.display = "block";
-      document.querySelector(".action-buttons").style.display = "flex";
+
+      const assessmentStatus = document
+        .getElementById("assessmentStatus")
+        .textContent.toLowerCase();
+      const actionButtons = document.querySelector(".action-buttons");
+
+      if (["approved", "rejected"].includes(assessmentStatus)) {
+        actionButtons.style.display = "none";
+      } else {
+        actionButtons.style.display = "flex";
+      }
+
       historyContainer.style.display = "none";
       const oldPagination = document.querySelector(".pagination-controls");
       if (oldPagination) oldPagination.remove();
